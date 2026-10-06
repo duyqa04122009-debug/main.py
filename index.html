@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>About Me - Profile Page</title>
+    <!-- Import Font Awesome lấy icon -->
+    <link rel="stylesheet" href="https://cloudflare.com">
+    <!-- Import Google Fonts chuẩn -->
+    <link href="https://googleapis.com" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <!-- Hiệu ứng hạt lấp lánh nền -->
+    <canvas id="snow"></canvas>
+
+    <!-- Nút phát nhạc -->
+    <div class="music-container">
+        <button id="musicBtn"><i class="fa-solid fa-music"></i> Bật Nhạc Lofi</button>
+        <audio id="lofiTrack" loop src="https://files.catbox.moe/p0v5k0.mp3"></audio>
+    </div>
+
+    <!-- Khung bọc nội dung chính -->
+    <div class="main-wrapper">
+        
+        <!-- KHUNG 1: KHU VỰC MEME ĐỘNG CHÀO MỪNG (Xuất hiện ngay lập tức) -->
+        <div class="meme-welcome card">
+            <span class="badge">Meme of the day 🎬</span>
+            <!-- Bạn có thể thay link ảnh GIF hoạt hình/meme tùy ý vào src dưới đây -->
+            <img src="https://www.image2url.com/r2/default/gifs/1791266279568-f36db3bf-3c1c-4e05-a881-4a8e5a8a7e0a.gif" alt="Welcome Meme" class="meme-img">
+            <p class="meme-caption">"Ủa alo, ai ghé thăm nhà tui đó?"</p>
+        </div>
+
+        <!-- KHUNG 2: Lời chào và Avatar (Luôn hiển thị) -->
+        <header class="hero card">
+            <div class="avatar-container">
+                <img src="https://i.postimg.cc/XNfKvpwd/anh-gai.webp" alt="Avatar" class="avatar-img">
+            </div>
+            <h1>Xin chào, Mình là <span class="highlight">Hoang Xuan Duy</span> ✨</h1>
+            <p>Chào mừng bạn đã ghé thăm góc nhỏ của mình trên Internet. Hãy lướt xuống để khám phá tiếp nhé!</p>
+        </header>
+
+        <!-- KHUNG 3: Về bản thân (Hiệu ứng cuộn mượt) -->
+        <section class="about card hidden">
+            <h2>✨ Đôi điều về mình</h2>
+            <p>Mình là một người yêu thích sự nhẹ nhàng, mê cái đẹp và thích khám phá những điều mới mẻ. Trang web này được thiết kế như một cuốn nhật ký trực tuyến nhỏ lưu giữ những khoảnh khắc đáng yêu.</p>
+        </section>
+
+        <!-- KHUNG 4: Sở thích nâng cấp -->
+        <section class="skills card hidden">
+            <h2>☁️ My Favorites</h2>
+            <ul class="favorites-list">
+                <li><i class="fa-solid fa-music"></i> <strong>Âm nhạc:</strong> Lofi nhẹ nhàng hoặc Acoustic mộc mạc vào mỗi buổi tối.</li>
+                <li><i class="fa-solid fa-mug-saucer"></i> <strong>Cà phê:</strong> Thương những góc quán quen tĩnh lặng và một ly bạc xỉu đá.</li>
+                <li><i class="fa-solid fa-film"></i> <strong>Phim ảnh:</strong> Mê mẩn những bộ phim Anime nhẹ nhàng của nhà Ghibli.</li>
+            </ul>
+        </section>
+
+        <!-- KHUNG 5: CHÂM NGÔN YÊU THÍCH (MỚI) -->
+        <section class="quote-section card hidden">
+            <h2><i class="fa-solid fa-quote-left"></i> Châm ngôn sống</h2>
+            <div class="quote-box">
+                <p class="quote-text">"Hãy sống như một bông hoa dại, học cách sinh tồn trong mọi hoàn cảnh khắc nghiệt nhất, ngay cả khi người đời cho rằng bạn không thể nở hoa."</p>
+                <span class="quote-author">— Khuyết danh</span>
+            </div>
+        </section>
+
+        <!-- KHUNG 6: TRẠNG THÁI HIỆN TẠI (MỚI - CLICK ĐỂ ĐỔI THỬ) -->
+        <section class="status-section card hidden">
+            <h2>🔋 Trạng thái hôm nay</h2>
+            <div class="status-grid">
+                <div class="status-item"><strong>Tâm trạng:</strong> 🪐 Đang lơ lửng</div>
+                <div class="status-item"><strong>Học tập:</strong> ☕ Đang nạp năng lượng</div>
+                <div class="status-item"><strong>Ưu tiên:</strong> 🛌 Đi ngủ đúng giờ</div>
+            </div>
+        </section>
+
+        <!-- KHUNG 7: Nút Mạng Xã Hội (Đã hướng dẫn gắn link thật) -->
+        <section class="socials card hidden">
+            <h2>🤝 Kết nối cùng mình</h2>
+            <div class="social-buttons">
+                <!-- HƯỚNG DẪN: Thay link tài khoản thật của bạn vào trong dấu ngoặc kép của href="..." -->
+                <a href="https://facebook.com" target="_blank" class="social-btn facebook"><i class="fa-brands fa-facebook-f"></i> Facebook</a>
+                <a href="https://instagram.com" target="_blank" class="social-btn instagram"><i class="fa-brands fa-instagram"></i> Instagram</a>
+                <a href="https://tiktok.com" target="_blank" class="social-btn tiktok"><i class="fa-brands fa-tiktok"></i> TikTok</a>
+            </div>
+        </section>
+
+        <!-- KHUNG 8: HỘP GỬI LỜI NHẮN BÍ MẬT (MỚI - TĂNG TƯƠNG TÁC) -->
+        <section class="message-box card hidden">
+            <h2>✍️ Để lại lời nhắn</h2>
+            <p style="margin-bottom: 15px; font-size: 0.9rem;">Bạn có điều gì muốn nói với mình không?</p>
+            <textarea id="userMsg" placeholder="Nhập lời nhắn đáng yêu tại đây..."></textarea>
+            <button id="sendBtn">Gửi lời nhắn <i class="fa-solid fa-paper-plane"></i></button>
+        </section>
+
+        <!-- KHUNG 9: Footer kết bài -->
+        <footer class="card hidden">
+            <p>Rất vui vì được kết nối cùng bạn! Chúc bạn một ngày tốt lành ☕</p>
+        </footer>
+        
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>

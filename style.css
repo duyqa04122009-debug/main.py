@@ -1,0 +1,269 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    background-color: #fdf6ec; /* Màu be sữa chuẩn ảnh số 2 */
+    color: #2c2a29;
+    font-family: 'Inter', sans-serif;
+    overflow-x: hidden;
+    position: relative;
+}
+
+#snow {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 1;
+}
+
+.music-container {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    z-index: 100;
+}
+
+#musicBtn {
+    background-color: #ffffff;
+    border: 1px solid #e6d7c8;
+    color: #5c4f43;
+    padding: 10px 18px;
+    border-radius: 50px;
+    cursor: pointer;
+    font-weight: 600;
+    box-shadow: 0 4px 10px rgba(139, 115, 85, 0.1);
+    transition: all 0.2s ease;
+}
+
+#musicBtn:hover {
+    background-color: #fdf6ec;
+    transform: translateY(-2px);
+}
+
+.main-wrapper {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 35px; /* Giữ khoảng cách vừa vặn giữa các card */
+    padding: 60px 16px;
+    position: relative;
+    z-index: 10;
+}
+
+/* Khung nền đặc đổ bóng mượt giống ảnh mẫu 2 */
+.card {
+    background-color: #ffffff; 
+    border: 1px solid #f3eade;
+    border-radius: 20px;
+    padding: 30px 20px;
+    width: 100%;
+    max-width: 480px;
+    text-align: center;
+    box-shadow: 0 6px 20px rgba(180, 160, 140, 0.12);
+}
+
+/* Định dạng khu vực Meme của trang */
+.meme-welcome {
+    position: relative;
+    padding-top: 40px;
+}
+
+.badge {
+    position: absolute;
+    top: 12px;
+    left: 50%;
+    transform: translateX(-50%);
+    background-color: #faedcd;
+    color: #b58263;
+    font-size: 0.8rem;
+    font-weight: 600;
+    padding: 3px 10px;
+    border-radius: 20px;
+}
+
+.meme-img {
+    width: 100%;
+    max-height: 220px;
+    object-fit: contain;
+    border-radius: 12px;
+    margin-bottom: 10px;
+}
+
+.meme-caption {
+    font-style: italic;
+    font-size: 0.95rem;
+    color: #8b7355;
+}
+
+/* Khung Avatar */
+.avatar-container {
+    width: 110px;
+    height: 110px;
+    margin: 0 auto 15px;
+    border-radius: 50%;
+    background: linear-gradient(45deg, #e3a857, #ddb892);
+    padding: 3px; 
+    box-shadow: 0 6px 15px rgba(221, 184, 146, 0.3);
+}
+
+.avatar-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 50%;
+    display: block;
+    background-color: #eaeaea;
+}
+
+h1, h2 {
+    font-family: 'Poppins', sans-serif;
+    font-weight: 700;
+    color: #3c3534;
+}
+
+h1 { font-size: 1.9rem; margin-bottom: 12px; }
+h2 { font-size: 1.35rem; margin-bottom: 15px; color: #b58263; }
+p { font-size: 0.98rem; line-height: 1.6; color: #4a4441; }
+
+.highlight {
+    color: #d4a373;
+    font-weight: 700;
+}
+
+.favorites-list {
+    list-style: none;
+    text-align: left;
+    display: inline-block;
+}
+
+.favorites-list li {
+    font-size: 0.98rem;
+    margin-bottom: 12px;
+    line-height: 1.5;
+    color: #4a4441;
+}
+
+.favorites-list li i {
+    color: #b58263;
+    margin-right: 8px;
+}
+
+/* Định dạng phần Quote châm ngôn */
+.quote-box {
+    background-color: #fefae0;
+    border-left: 4px solid #dda15e;
+    padding: 15px;
+    border-radius: 0 12px 12px 0;
+    text-align: left;
+}
+
+.quote-text {
+    font-style: italic;
+    color: #606c38;
+    margin-bottom: 5px;
+}
+
+.quote-author {
+    font-size: 0.85rem;
+    color: #94a3b8;
+    display: block;
+    text-align: right;
+}
+
+/* Định dạng phần lưới Trạng thái */
+.status-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 10px;
+    text-align: left;
+}
+
+.status-item {
+    background-color: #f8f9fa;
+    padding: 10px 15px;
+    border-radius: 10px;
+    font-size: 0.95rem;
+    border: 1px solid #f1f5f9;
+}
+
+/* Nút Mạng Xã Hội */
+.social-buttons {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    width: 100%;
+}
+
+.social-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    padding: 12px;
+    border-radius: 12px;
+    text-decoration: none;
+    font-weight: 600;
+    color: white;
+    font-size: 0.95rem;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.facebook { background: #4b7bec; }
+.instagram { background: linear-gradient(45deg, #ff7675, #fd9644); }
+.tiktok { background: #333333; }
+
+.social-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 12px rgba(0,0,0,0.1);
+}
+
+/* Định dạng Hộp thư gửi tin nhắn */
+textarea {
+    width: 100%;
+    height: 80px;
+    padding: 10px;
+    border-radius: 10px;
+    border: 1px solid #e2e8f0;
+    resize: none;
+    font-family: inherit;
+    margin-bottom: 10px;
+    outline: none;
+}
+
+textarea:focus {
+    border-color: #d4a373;
+}
+
+#sendBtn {
+    background-color: #b58263;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 10px;
+    cursor: pointer;
+    font-weight: 600;
+    font-size: 0.9rem;
+    transition: background 0.2s;
+}
+
+#sendBtn:hover {
+    background-color: #d4a373;
+}
+
+/* --- HIỆU ỨNG HIỆN CHỮ CUỘN TRANG MƯỢT --- */
+.hidden {
+    opacity: 0;
+    transform: translateY(30px);
+    transition: opacity 0.6s ease, transform 0.6s ease;
+}
+
+.show {
+    opacity: 1;
+    transform: translateY(0);
+}
