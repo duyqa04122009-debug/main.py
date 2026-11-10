@@ -1,0 +1,998 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GUN.LOL Style | 3D Cyber Bio Link</title>
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;800;900&family=Rajdhani:wght@500;600;700&family=Plus+Jakarta+Sans:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <!-- Three.js Engine -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        orbitron: ['Orbitron', 'sans-serif'],
+                        rajdhani: ['Rajdhani', 'sans-serif'],
+                        sans: ['Plus Jakarta Sans', 'sans-serif'],
+                    },
+                    colors: {
+                        cyber: {
+                            black: '#030307',
+                            card: 'rgba(12, 12, 20, 0.75)',
+                            purple: '#a855f7',
+                            cyan: '#06b6d4',
+                            pink: '#ec4899',
+                            emerald: '#10b981',
+                        }
+                    },
+                    animation: {
+                        'spin-slow': 'spin 12s linear infinite',
+                        'pulse-glow': 'pulseGlow 2.5s ease-in-out infinite',
+                        'scanline': 'scanline 6s linear infinite',
+                    },
+                    keyframes: {
+                        pulseGlow: {
+                            '0%, 100%': { filter: 'drop-shadow(0 0 15px rgba(168, 85, 247, 0.5))' },
+                            '50%': { filter: 'drop-shadow(0 0 30px rgba(6, 182, 212, 0.8))' },
+                        },
+                        scanline: {
+                            '0%': { transform: 'translateY(-100%)' },
+                            '100%': { transform: 'translateY(100vh)' }
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        body {
+            background-color: #030307;
+            color: #ffffff;
+            overflow-x: hidden;
+            user-select: none;
+        }
+
+        /* Glassmorphism Card Effect */
+        .glass-card {
+            background: rgba(10, 10, 18, 0.7);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.9),
+                        0 0 35px rgba(168, 85, 247, 0.18),
+                        inset 0 1px 1px rgba(255, 255, 255, 0.2);
+        }
+
+        .glass-modal {
+            background: rgba(12, 12, 22, 0.92);
+            backdrop-filter: blur(24px);
+            -webkit-backdrop-filter: blur(24px);
+            border: 1px solid rgba(168, 85, 247, 0.3);
+            box-shadow: 0 0 50px rgba(0, 0, 0, 0.95), 0 0 30px rgba(168, 85, 247, 0.25);
+        }
+
+        .glass-button {
+            background: rgba(255, 255, 255, 0.03);
+            backdrop-filter: blur(8px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .glass-button::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.15), transparent);
+            transition: left 0.5s ease;
+        }
+
+        .glass-button:hover::before {
+            left: 100%;
+        }
+
+        .glass-button:hover {
+            border-color: rgba(168, 85, 247, 0.6);
+            transform: translateY(-2px) scale(1.01);
+            box-shadow: 0 8px 25px rgba(168, 85, 247, 0.3);
+            background: rgba(168, 85, 247, 0.15);
+        }
+
+        /* Neon Glow Effects */
+        .glow-text-purple {
+            text-shadow: 0 0 12px rgba(168, 85, 247, 0.8), 0 0 25px rgba(168, 85, 247, 0.4);
+        }
+        
+        .glow-text-cyan {
+            text-shadow: 0 0 12px rgba(6, 182, 212, 0.8), 0 0 25px rgba(6, 182, 212, 0.4);
+        }
+
+        /* CRT Overlay Effect */
+        .crt-scanlines {
+            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.3) 50%);
+            background-size: 100% 4px;
+            pointer-events: none;
+        }
+
+        /* 3D Card tilt container */
+        #tilt-card {
+            transform-style: preserve-3d;
+            transition: transform 0.15s ease-out;
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: rgba(10, 10, 18, 0.8);
+        }
+        ::-webkit-scrollbar-thumb {
+            background: rgba(168, 85, 247, 0.5);
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: rgba(6, 182, 212, 0.8);
+        }
+    </style>
+</head>
+<body class="min-h-screen flex items-center justify-center relative font-sans antialiased selection:bg-purple-500 selection:text-white py-10 px-4">
+
+    <!-- Canvas Background for 3D Scene & Audio Visualizer -->
+    <canvas id="bg-canvas" class="fixed inset-0 w-full h-full z-0 pointer-events-auto"></canvas>
+
+    <!-- Custom Background Video Layer (If configured) -->
+    <video id="bg-video-layer" class="fixed inset-0 w-full h-full object-cover z-0 hidden" loop muted playsinline></video>
+    
+    <!-- Custom Background Image Layer (If configured) -->
+    <div id="bg-image-layer" class="fixed inset-0 w-full h-full bg-cover bg-center z-0 hidden"></div>
+
+    <!-- Scanline & Ambient Overlay -->
+    <div class="crt-scanlines fixed inset-0 z-10 pointer-events-none opacity-40"></div>
+    <div class="fixed inset-0 bg-gradient-to-t from-[#030307] via-transparent to-[#030307]/70 z-10 pointer-events-none"></div>
+
+    <!-- Audio Element -->
+    <audio id="bg-audio" loop preload="auto"></audio>
+
+    <!-- Toast Notification -->
+    <div id="toast" class="fixed top-6 left-1/2 -translate-x-1/2 z-50 transform -translate-y-20 opacity-0 transition-all duration-300 pointer-events-none">
+        <div class="bg-gray-950/90 border border-purple-500/50 text-white px-5 py-2.5 rounded-full shadow-2xl backdrop-blur-md flex items-center gap-2 text-sm font-rajdhani tracking-wide">
+            <i class="fa-solid fa-bolt text-purple-400" id="toast-icon"></i>
+            <span id="toast-message">Cấu hình đã được lưu!</span>
+        </div>
+    </div>
+
+    <!-- Top Action Toolbar -->
+    <div class="fixed top-5 right-5 z-30 flex items-center gap-3">
+        <!-- Settings Modal Trigger -->
+        <button id="open-settings-btn" title="Cài đặt & Tùy chỉnh Bio" class="w-11 h-11 rounded-xl glass-button flex items-center justify-center text-purple-300 hover:text-white shadow-lg transition-all group border-purple-500/30">
+            <i class="fa-solid fa-gear text-lg group-hover:rotate-90 transition-transform duration-500"></i>
+        </button>
+        <!-- Audio Play/Pause Button -->
+        <button id="audio-toggle-btn" title="Phát/Dừng Nhạc" class="w-11 h-11 rounded-xl glass-button flex items-center justify-center text-cyan-300 hover:text-white shadow-lg transition-all">
+            <i class="fa-solid fa-music text-lg" id="audio-btn-icon"></i>
+        </button>
+        <!-- Share Link Button -->
+        <button id="share-btn" title="Sao chép liên kết" class="w-11 h-11 rounded-xl glass-button flex items-center justify-center text-pink-300 hover:text-white shadow-lg transition-all">
+            <i class="fa-solid fa-share-nodes text-lg"></i>
+        </button>
+    </div>
+
+    <!-- Main Bio Card Container -->
+    <main class="relative z-20 w-full max-w-md my-auto">
+        
+        <!-- Glassmorphism Card -->
+        <div id="tilt-card" class="glass-card rounded-3xl p-6 sm:p-8 flex flex-col items-center text-center relative overflow-hidden transition-all duration-200">
+            
+            <!-- Glow Ambient Top Effect -->
+            <div class="absolute -top-24 left-1/2 -translate-x-1/2 w-56 h-56 bg-gradient-to-r from-purple-600/30 to-cyan-500/30 rounded-full blur-3xl pointer-events-none"></div>
+
+            <!-- Vinyl Disk Music Animation (Active when music plays) -->
+            <div id="vinyl-wrapper" class="absolute top-4 right-4 w-12 h-12 transition-all duration-500 opacity-20 hover:opacity-100 cursor-pointer" title="Âm nhạc">
+                <div id="vinyl-disk" class="w-full h-full rounded-full border-2 border-purple-500/50 bg-black flex items-center justify-center shadow-lg relative overflow-hidden">
+                    <div class="w-4 h-4 rounded-full bg-gradient-to-tr from-purple-500 to-cyan-400 flex items-center justify-center">
+                        <div class="w-1.5 h-1.5 rounded-full bg-black"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Avatar Container -->
+            <div class="relative mb-5 group cursor-pointer">
+                <!-- Glowing Aura -->
+                <div class="absolute -inset-1.5 bg-gradient-to-r from-purple-600 via-pink-500 to-cyan-400 rounded-full blur-md opacity-80 group-hover:opacity-100 transition duration-500 animate-pulse-glow"></div>
+                
+                <!-- Avatar Image -->
+                <div class="relative w-28 h-28 rounded-full overflow-hidden border-2 border-white/20 p-1 bg-black/60 shadow-2xl">
+                    <img id="bio-avatar" src="https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=300&auto=format&fit=crop" 
+                         alt="Avatar" 
+                         class="w-full h-full object-cover rounded-full transform group-hover:scale-110 transition-transform duration-500"
+                         onerror="this.src='https://placehold.co/200x200/12121c/a855f7?text=GUN.LOL'">
+                </div>
+
+                <!-- Verified Badge -->
+                <div class="absolute bottom-0 right-0 bg-gradient-to-r from-purple-600 to-pink-600 text-white p-1.5 rounded-full border-2 border-gray-950 shadow-lg text-xs flex items-center justify-center" title="Đã xác minh">
+                    <i class="fa-solid fa-check text-[10px]"></i>
+                </div>
+            </div>
+
+            <!-- Display Name -->
+            <h1 id="bio-name" class="text-2xl sm:text-3xl font-black font-orbitron tracking-wider text-white mb-1 glow-text-purple flex items-center justify-center gap-2">
+                ALEX_CYBER
+            </h1>
+            
+            <!-- Dynamic Typing Status -->
+            <p class="text-xs sm:text-sm text-cyan-300 font-rajdhani font-semibold mb-3 tracking-widest uppercase h-5 flex items-center justify-center">
+                <span id="typed-text"></span><span class="animate-pulse text-purple-400 font-bold">|</span>
+            </p>
+
+            <!-- Bio Description -->
+            <p id="bio-description" class="text-gray-300 text-sm mb-5 leading-relaxed font-sans font-light max-w-xs">
+                Sáng tạo trải nghiệm 3D Web, âm nhạc Cyberpunk & giao diện độc đáo theo phong cách Gun.lol.
+            </p>
+
+            <!-- Dynamic Social Media Icons (Smart Render) -->
+            <div id="social-links-container" class="flex flex-wrap items-center justify-center gap-2.5 mb-6 w-full min-h-[40px]">
+                <!-- Rendered dynamically by JavaScript -->
+            </div>
+
+            <!-- Main Custom Links Buttons -->
+            <div id="custom-links-container" class="w-full flex flex-col gap-3">
+                <!-- Rendered dynamically by JavaScript -->
+            </div>
+
+            <!-- Footer Badge -->
+            <div class="mt-6 pt-4 border-t border-white/10 w-full flex items-center justify-between text-[11px] font-orbitron text-gray-400">
+                <span class="flex items-center gap-1.5">
+                    <span class="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span> 
+                    <span class="text-emerald-400 font-semibold">LIVE 3D</span>
+                </span>
+                <span class="text-purple-400/80 hover:text-purple-300 cursor-pointer" id="footer-preset-btn">GUN.LOL AESTHETIC</span>
+            </div>
+        </div>
+    </main>
+
+    <!-- SETTINGS & CUSTOMIZER MODAL -->
+    <div id="settings-modal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md opacity-0 pointer-events-none transition-all duration-300">
+        <div class="glass-modal w-full max-w-xl rounded-3xl p-6 max-h-[90vh] flex flex-col overflow-hidden text-gray-200">
+            
+            <!-- Modal Header -->
+            <div class="flex items-center justify-between pb-4 border-b border-white/10 font-orbitron">
+                <div class="flex items-center gap-2.5 text-purple-400">
+                    <i class="fa-solid fa-sliders text-xl"></i>
+                    <h2 class="text-lg font-bold tracking-wider text-white">BẢNG TÙY CHỈNH BIO 3D</h2>
+                </div>
+                <button id="close-settings-btn" class="w-8 h-8 rounded-full bg-white/5 hover:bg-red-500/20 hover:text-red-400 flex items-center justify-center text-gray-400 transition-all">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+
+            <!-- Modal Body (Scrollable Tabs) -->
+            <div class="overflow-y-auto py-4 space-y-6 pr-1 my-2 font-sans text-xs sm:text-sm">
+                
+                <!-- Section 1: Profile Info -->
+                <div class="bg-black/30 p-4 rounded-2xl border border-white/5 space-y-3">
+                    <h3 class="font-orbitron font-semibold text-purple-400 text-xs tracking-wider uppercase flex items-center gap-2">
+                        <i class="fa-solid fa-user"></i> Thông Tin Cá Nhân
+                    </h3>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        <div>
+                            <label class="block text-gray-400 text-xs mb-1">Tên hiển thị</label>
+                            <input type="text" id="setting-name" class="w-full bg-black/50 border border-white/10 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-purple-500">
+                        </div>
+                        <div>
+                            <label class="block text-gray-400 text-xs mb-1">Avatar Image URL</label>
+                            <input type="text" id="setting-avatar" class="w-full bg-black/50 border border-white/10 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-purple-500">
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-gray-400 text-xs mb-1">Chữ chạy Typing (Phân cách bằng dấu phẩy ",")</label>
+                        <input type="text" id="setting-typing" class="w-full bg-black/50 border border-white/10 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-purple-500" placeholder="WEB DEVELOPER, CYBERPUNK, LOFI MUSIC">
+                    </div>
+                    <div>
+                        <label class="block text-gray-400 text-xs mb-1">Mô tả Bio</label>
+                        <textarea id="setting-bio" rows="2" class="w-full bg-black/50 border border-white/10 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-purple-500"></textarea>
+                    </div>
+                </div>
+
+                <!-- Section 2: 3D Scene & Background -->
+                <div class="bg-black/30 p-4 rounded-2xl border border-white/5 space-y-3">
+                    <h3 class="font-orbitron font-semibold text-cyan-400 text-xs tracking-wider uppercase flex items-center gap-2">
+                        <i class="fa-solid fa-cubes"></i> Hiệu Ứng Nền 3D & Background
+                    </h3>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        <div>
+                            <label class="block text-gray-400 text-xs mb-1">Chế độ 3D Scene</label>
+                            <select id="setting-3d-mode" class="w-full bg-black/80 border border-white/10 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-cyan-500">
+                                <option value="cyber-grid">Cyber Matrix & Floating Shapes</option>
+                                <option value="particle-field">Particle Nebula Stars</option>
+                                <option value="custom-image">Hình Ảnh URL Tùy Chỉnh</option>
+                                <option value="custom-video">Video MP4 URL Tùy Chỉnh</option>
+                            </select>
+                        </div>
+                        <div id="bg-url-container">
+                            <label class="block text-gray-400 text-xs mb-1">Image / Video MP4 URL</label>
+                            <input type="text" id="setting-bg-url" class="w-full bg-black/50 border border-white/10 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-cyan-500" placeholder="https://domain.com/background.mp4">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Section 3: Music Audio Settings -->
+                <div class="bg-black/30 p-4 rounded-2xl border border-white/5 space-y-3">
+                    <h3 class="font-orbitron font-semibold text-pink-400 text-xs tracking-wider uppercase flex items-center gap-2">
+                        <i class="fa-solid fa-music"></i> Âm Nhạc Nền (Audio MP3)
+                    </h3>
+                    <div>
+                        <label class="block text-gray-400 text-xs mb-1">Audio URL (.mp3)</label>
+                        <input type="text" id="setting-audio-url" class="w-full bg-black/50 border border-white/10 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-pink-500" placeholder="https://domain.com/song.mp3">
+                    </div>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        <div>
+                            <label class="block text-gray-400 text-xs mb-1">Preset Nhạc Mẫu</label>
+                            <select id="setting-audio-preset" class="w-full bg-black/80 border border-white/10 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-pink-500">
+                                <option value="">-- Chọn bài mẫu --</option>
+                                <option value="https://cdn.pixabay.com/download/audio/2022/05/27/audio_1808fbf07a.mp3?filename=lofi-study-112191.mp3">Lofi Chill Cyber Beats</option>
+                                <option value="https://cdn.pixabay.com/download/audio/2022/03/15/audio_c8c8a73467.mp3?filename=synthwave-80s-110045.mp3">Retro Synthwave Drift</option>
+                                <option value="https://cdn.pixabay.com/download/audio/2022/10/14/audio_9939f79220.mp3?filename=cyberpunk-2099-125010.mp3">Hard Cyberpunk Drill</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-gray-400 text-xs mb-1">Âm Lượng Mặc Định</label>
+                            <input type="range" id="setting-audio-volume" min="0" max="1" step="0.05" class="w-full accent-pink-500 mt-2">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Section 4: Dynamic Social Links -->
+                <div class="bg-black/30 p-4 rounded-2xl border border-white/5 space-y-3">
+                    <div class="flex items-center justify-between">
+                        <h3 class="font-orbitron font-semibold text-emerald-400 text-xs tracking-wider uppercase flex items-center gap-2">
+                            <i class="fa-solid fa-share-nodes"></i> Mạng Xã Hội (Chỉ hiện nếu điền URL)
+                        </h3>
+                    </div>
+                    <p class="text-[11px] text-gray-400">Để trống hoặc bỏ trắng để ẩn icon tương ứng khỏi Bio.</p>
+                    
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                        <div class="flex items-center gap-2 bg-black/40 p-1.5 rounded-xl border border-white/5">
+                            <i class="fa-brands fa-facebook text-blue-500 text-base w-5 text-center"></i>
+                            <input type="text" id="soc-facebook" placeholder="Facebook URL" class="w-full bg-transparent text-xs text-white focus:outline-none">
+                        </div>
+                        <div class="flex items-center gap-2 bg-black/40 p-1.5 rounded-xl border border-white/5">
+                            <i class="fa-brands fa-instagram text-pink-500 text-base w-5 text-center"></i>
+                            <input type="text" id="soc-instagram" placeholder="Instagram URL" class="w-full bg-transparent text-xs text-white focus:outline-none">
+                        </div>
+                        <div class="flex items-center gap-2 bg-black/40 p-1.5 rounded-xl border border-white/5">
+                            <i class="fa-brands fa-tiktok text-white text-base w-5 text-center"></i>
+                            <input type="text" id="soc-tiktok" placeholder="TikTok URL" class="w-full bg-transparent text-xs text-white focus:outline-none">
+                        </div>
+                        <div class="flex items-center gap-2 bg-black/40 p-1.5 rounded-xl border border-white/5">
+                            <i class="fa-brands fa-telegram text-sky-400 text-base w-5 text-center"></i>
+                            <input type="text" id="soc-telegram" placeholder="Telegram URL" class="w-full bg-transparent text-xs text-white focus:outline-none">
+                        </div>
+                        <div class="flex items-center gap-2 bg-black/40 p-1.5 rounded-xl border border-white/5">
+                            <i class="fa-brands fa-discord text-indigo-400 text-base w-5 text-center"></i>
+                            <input type="text" id="soc-discord" placeholder="Discord URL" class="w-full bg-transparent text-xs text-white focus:outline-none">
+                        </div>
+                        <div class="flex items-center gap-2 bg-black/40 p-1.5 rounded-xl border border-white/5">
+                            <i class="fa-brands fa-youtube text-red-500 text-base w-5 text-center"></i>
+                            <input type="text" id="soc-youtube" placeholder="YouTube URL" class="w-full bg-transparent text-xs text-white focus:outline-none">
+                        </div>
+                        <div class="flex items-center gap-2 bg-black/40 p-1.5 rounded-xl border border-white/5">
+                            <i class="fa-brands fa-github text-purple-400 text-base w-5 text-center"></i>
+                            <input type="text" id="soc-github" placeholder="GitHub URL" class="w-full bg-transparent text-xs text-white focus:outline-none">
+                        </div>
+                        <div class="flex items-center gap-2 bg-black/40 p-1.5 rounded-xl border border-white/5">
+                            <i class="fa-brands fa-spotify text-emerald-400 text-base w-5 text-center"></i>
+                            <input type="text" id="soc-spotify" placeholder="Spotify URL" class="w-full bg-transparent text-xs text-white focus:outline-none">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Section 5: Custom Link Buttons Manager -->
+                <div class="bg-black/30 p-4 rounded-2xl border border-white/5 space-y-3">
+                    <div class="flex items-center justify-between">
+                        <h3 class="font-orbitron font-semibold text-yellow-400 text-xs tracking-wider uppercase flex items-center gap-2">
+                            <i class="fa-solid fa-link"></i> Nút Liên Kết Chính (Custom Buttons)
+                        </h3>
+                        <button id="add-custom-link-btn" class="px-2.5 py-1 rounded-lg bg-yellow-500/20 text-yellow-300 border border-yellow-500/30 hover:bg-yellow-500/30 text-xs flex items-center gap-1 font-mono">
+                            <i class="fa-solid fa-plus"></i> Thêm Nút
+                        </button>
+                    </div>
+
+                    <div id="custom-links-editor-list" class="space-y-2">
+                        <!-- Custom button items editor will be rendered here -->
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- Modal Footer Controls -->
+            <div class="pt-4 border-t border-white/10 flex flex-wrap items-center justify-between gap-2 font-orbitron">
+                <div class="flex gap-2">
+                    <button id="reset-settings-btn" class="px-3 py-2 rounded-xl bg-red-500/20 text-red-300 border border-red-500/30 hover:bg-red-500/30 text-xs">
+                        <i class="fa-solid fa-rotate-left"></i> Khôi phục
+                    </button>
+                    <button id="export-json-btn" class="px-3 py-2 rounded-xl bg-purple-500/20 text-purple-300 border border-purple-500/30 hover:bg-purple-500/30 text-xs">
+                        <i class="fa-solid fa-download"></i> Export JSON
+                    </button>
+                </div>
+                <button id="save-settings-btn" class="px-5 py-2 rounded-xl bg-gradient-to-r from-purple-600 to-cyan-500 text-white font-bold text-xs shadow-lg hover:brightness-110 transition-all">
+                    <i class="fa-solid fa-floppy-disk mr-1"></i> LƯU CẤU HÌNH
+                </button>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- JavaScript Core System -->
+    <script>
+        /* ===================================================
+           1. DEFAULT CONFIGURATION & LOCALSTORAGE ENGINE
+           =================================================== */
+        const DEFAULT_CONFIG = {
+            name: "ALEX_CYBER",
+            avatar: "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=300&auto=format&fit=crop",
+            typing: ["3D WEB ARCHITECT", "CYBERPUNK CREATOR", "GUN.LOL VIBES"],
+            bio: "Sáng tạo trải nghiệm 3D Web, âm nhạc Cyberpunk & giao diện độc đáo theo phong cách Gun.lol.",
+            bgMode: "cyber-grid",
+            bgUrl: "",
+            audioUrl: "https://cdn.pixabay.com/download/audio/2022/05/27/audio_1808fbf07a.mp3?filename=lofi-study-112191.mp3",
+            audioVolume: 0.5,
+            socials: {
+                facebook: "https://facebook.com",
+                instagram: "https://instagram.com",
+                tiktok: "https://tiktok.com",
+                telegram: "https://t.me",
+                discord: "https://discord.gg",
+                youtube: "https://youtube.com",
+                github: "https://github.com",
+                spotify: "https://spotify.com"
+            },
+            customLinks: [
+                { id: "1", title: "Trang Web Cá Nhân / Portfolio", url: "https://github.com", icon: "fa-solid fa-globe", color: "purple" },
+                { id: "2", title: "Cộng Đồng Discord Cyber", url: "https://discord.gg", icon: "fa-brands fa-discord", color: "indigo" },
+                { id: "3", title: "Kênh YouTube Trực Tiếp", url: "https://youtube.com", icon: "fa-brands fa-youtube", color: "red" }
+            ]
+        };
+
+        let config = loadConfig();
+
+        function loadConfig() {
+            try {
+                const saved = localStorage.getItem('cyber_bio_config');
+                return saved ? JSON.parse(saved) : JSON.parse(JSON.stringify(DEFAULT_CONFIG));
+            } catch (e) {
+                return JSON.parse(JSON.stringify(DEFAULT_CONFIG));
+            }
+        }
+
+        function saveConfig() {
+            localStorage.setItem('cyber_bio_config', JSON.stringify(config));
+            renderBioCard();
+            update3DBackground();
+            showToast("Đã lưu cấu hình Bio thành công!");
+        }
+
+
+        /* ===================================================
+           2. THREE.JS 3D INTERACTIVE SCENE & AUDIO VISUALIZER
+           =================================================== */
+        let scene, camera, renderer, particles, gridMesh, floatingShapes = [];
+        let mouseX = 0, mouseY = 0, targetX = 0, targetY = 0;
+        let audioAnalyser = null, audioDataArray = null;
+
+        function initThreeJS() {
+            const canvas = document.getElementById('bg-canvas');
+            scene = new THREE.Scene();
+            scene.fog = new THREE.FogExp2(0x030307, 0.008);
+
+            camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 1, 1500);
+            camera.position.set(0, 80, 350);
+
+            renderer = new THREE.WebGLRenderer({ canvas: canvas, antialias: true, alpha: true });
+            renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+            renderer.setSize(window.innerWidth, window.innerHeight);
+
+            // Create Particles Field
+            const count = 1500;
+            const pos = new Float32Array(count * 3);
+            const cols = new Float32Array(count * 3);
+            const c1 = new THREE.Color(0xa855f7);
+            const c2 = new THREE.Color(0x06b6d4);
+
+            for(let i=0; i<count*3; i+=3) {
+                pos[i] = (Math.random() - 0.5) * 1200;
+                pos[i+1] = (Math.random() - 0.5) * 1200;
+                pos[i+2] = (Math.random() - 0.5) * 1200;
+
+                const mix = Math.random() > 0.5 ? c1 : c2;
+                cols[i] = mix.r; cols[i+1] = mix.g; cols[i+2] = mix.b;
+            }
+
+            const pGeom = new THREE.BufferGeometry();
+            pGeom.setAttribute('position', new THREE.BufferAttribute(pos, 3));
+            pGeom.setAttribute('color', new THREE.BufferAttribute(cols, 3));
+
+            const pMat = new THREE.PointsMaterial({
+                size: 3.5,
+                vertexColors: true,
+                transparent: true,
+                opacity: 0.75,
+                blending: THREE.AdditiveBlending
+            });
+
+            particles = new THREE.Points(pGeom, pMat);
+            scene.add(particles);
+
+            // Cyber Grid Floor
+            gridMesh = new THREE.GridHelper(1600, 50, 0xa855f7, 0x1e1b4b);
+            gridMesh.position.y = -180;
+            scene.add(gridMesh);
+
+            // Floating 3D Geometries (Torus, Icosahedron)
+            const geom1 = new THREE.TorusKnotGeometry(25, 6, 100, 16);
+            const mat1 = new THREE.MeshBasicMaterial({ color: 0xa855f7, wireframe: true, transparent: true, opacity: 0.25 });
+            const mesh1 = new THREE.Mesh(geom1, mat1);
+            mesh1.position.set(-180, 50, -100);
+            scene.add(mesh1);
+            floatingShapes.push(mesh1);
+
+            const geom2 = new THREE.IcosahedronGeometry(35, 1);
+            const mat2 = new THREE.MeshBasicMaterial({ color: 0x06b6d4, wireframe: true, transparent: true, opacity: 0.2 });
+            const mesh2 = new THREE.Mesh(geom2, mat2);
+            mesh2.position.set(200, -30, -150);
+            scene.add(mesh2);
+            floatingShapes.push(mesh2);
+
+            // Listeners
+            window.addEventListener('resize', onResize);
+            document.addEventListener('mousemove', (e) => {
+                mouseX = (e.clientX - window.innerWidth/2) * 0.4;
+                mouseY = (e.clientY - window.innerHeight/2) * 0.4;
+            });
+        }
+
+        function onResize() {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        }
+
+        function update3DBackground() {
+            const canvas = document.getElementById('bg-canvas');
+            const bgVideo = document.getElementById('bg-video-layer');
+            const bgImage = document.getElementById('bg-image-layer');
+
+            // Hide custom layers
+            bgVideo.classList.add('hidden');
+            bgImage.classList.add('hidden');
+            canvas.style.display = 'block';
+
+            if (config.bgMode === 'custom-image' && config.bgUrl) {
+                canvas.style.display = 'none';
+                bgImage.style.backgroundImage = `url('${config.bgUrl}')`;
+                bgImage.classList.remove('hidden');
+            } else if (config.bgMode === 'custom-video' && config.bgUrl) {
+                canvas.style.display = 'none';
+                bgVideo.src = config.bgUrl;
+                bgVideo.play().catch(() => {});
+                bgVideo.classList.remove('hidden');
+            } else if (config.bgMode === 'particle-field') {
+                gridMesh.visible = false;
+            } else {
+                gridMesh.visible = true;
+            }
+        }
+
+        function animate3D() {
+            requestAnimationFrame(animate3D);
+
+            targetX += (mouseX - targetX) * 0.03;
+            targetY += (mouseY - targetY) * 0.03;
+
+            camera.position.x = targetX;
+            camera.position.y = 80 + (-targetY * 0.5);
+            camera.lookAt(scene.position);
+
+            if (particles) {
+                particles.rotation.y += 0.0008;
+                particles.rotation.x += 0.0003;
+            }
+
+            floatingShapes.forEach((s, idx) => {
+                s.rotation.x += 0.005 * (idx + 1);
+                s.rotation.y += 0.008 * (idx + 1);
+            });
+
+            // Audio Visualizer Reaction
+            if (audioAnalyser && audioDataArray) {
+                audioAnalyser.getByteFrequencyData(audioDataArray);
+                let avg = 0;
+                for(let i=0; i<32; i++) avg += audioDataArray[i];
+                avg = avg / 32;
+
+                const scale = 1 + (avg / 128) * 0.3;
+                floatingShapes.forEach(s => s.scale.set(scale, scale, scale));
+            }
+
+            renderer.render(scene, camera);
+        }
+
+
+        /* ===================================================
+           3. AUDIO PLAYER & VINYL ENGINE
+           =================================================== */
+        const audioEl = document.getElementById('bg-audio');
+        const audioBtn = document.getElementById('audio-toggle-btn');
+        const audioIcon = document.getElementById('audio-btn-icon');
+        const vinylDisk = document.getElementById('vinyl-disk');
+        let isAudioPlaying = false;
+
+        function setupAudio() {
+            if (config.audioUrl) {
+                audioEl.src = config.audioUrl;
+                audioEl.volume = config.audioVolume || 0.5;
+            }
+        }
+
+        function toggleAudio() {
+            if (!audioEl.src) return;
+
+            if (!isAudioPlaying) {
+                audioEl.play().then(() => {
+                    isAudioPlaying = true;
+                    audioIcon.className = "fa-solid fa-pause text-pink-400";
+                    vinylDisk.classList.add('animate-spin-slow');
+                    showToast("Đang phát nhạc nền");
+                    initAudioAnalyser();
+                }).catch((err) => {
+                    showToast("Không thể tự động phát nhạc");
+                });
+            } else {
+                audioEl.pause();
+                isAudioPlaying = false;
+                audioIcon.className = "fa-solid fa-music text-cyan-300";
+                vinylDisk.classList.remove('animate-spin-slow');
+                showToast("Đã tạm dừng nhạc");
+            }
+        }
+
+        function initAudioAnalyser() {
+            if (audioAnalyser) return;
+            try {
+                const ctx = new (window.AudioContext || window.webkitAudioContext)();
+                const src = ctx.createMediaElementSource(audioEl);
+                audioAnalyser = ctx.createAnalyser();
+                src.connect(audioAnalyser);
+                audioAnalyser.connect(ctx.destination);
+                audioAnalyser.fftSize = 64;
+                audioDataArray = new Uint8Array(audioAnalyser.frequencyBinCount);
+            } catch(e) {}
+        }
+
+        audioBtn.addEventListener('click', toggleAudio);
+        document.getElementById('vinyl-wrapper').addEventListener('click', toggleAudio);
+
+
+        /* ===================================================
+           4. DYNAMIC TYPING & CARD TILT
+           =================================================== */
+        let typeIdx = 0, charIdx = 0, isDeleting = false;
+        let typingTimeout = null;
+
+        function startTypingEffect() {
+            if (typingTimeout) clearTimeout(typingTimeout);
+            const typedSpan = document.getElementById('typed-text');
+            const phrases = config.typing && config.typing.length ? config.typing : ["CYBERPUNK BIO"];
+
+            function type() {
+                const current = phrases[typeIdx % phrases.length];
+                if (isDeleting) {
+                    typedSpan.textContent = current.substring(0, charIdx - 1);
+                    charIdx--;
+                } else {
+                    typedSpan.textContent = current.substring(0, charIdx + 1);
+                    charIdx++;
+                }
+
+                let speed = isDeleting ? 40 : 90;
+
+                if (!isDeleting && charIdx === current.length) {
+                    speed = 2200;
+                    isDeleting = true;
+                } else if (isDeleting && charIdx === 0) {
+                    isDeleting = false;
+                    typeIdx++;
+                    speed = 350;
+                }
+
+                typingTimeout = setTimeout(type, speed);
+            }
+            type();
+        }
+
+        // 3D Card Parallax Tilt
+        const card = document.getElementById('tilt-card');
+        document.addEventListener('mousemove', (e) => {
+            if (window.innerWidth < 640) return; // Disable tilt on small mobile screens
+            const rect = card.getBoundingClientRect();
+            const cardCenterX = rect.left + rect.width / 2;
+            const cardCenterY = rect.top + rect.height / 2;
+
+            const angleX = (e.clientY - cardCenterY) / 25;
+            const angleY = (cardCenterX - e.clientX) / 25;
+
+            card.style.transform = `perspective(1000px) rotateX(${angleX}deg) rotateY(${angleY}deg)`;
+        });
+
+        document.addEventListener('mouseleave', () => {
+            card.style.transform = `perspective(1000px) rotateX(0deg) rotateY(0deg)`;
+        });
+
+
+        /* ===================================================
+           5. BIO CARD DYNAMIC RENDERING (SMART SOCIALS)
+           =================================================== */
+        const SOCIAL_ICONS = {
+            facebook: { icon: "fa-brands fa-facebook", name: "Facebook", color: "hover:text-blue-400" },
+            instagram: { icon: "fa-brands fa-instagram", name: "Instagram", color: "hover:text-pink-400" },
+            tiktok: { icon: "fa-brands fa-tiktok", name: "TikTok", color: "hover:text-white" },
+            telegram: { icon: "fa-brands fa-telegram", name: "Telegram", color: "hover:text-sky-400" },
+            discord: { icon: "fa-brands fa-discord", name: "Discord", color: "hover:text-indigo-400" },
+            youtube: { icon: "fa-brands fa-youtube", name: "YouTube", color: "hover:text-red-400" },
+            github: { icon: "fa-brands fa-github", name: "GitHub", color: "hover:text-purple-400" },
+            spotify: { icon: "fa-brands fa-spotify", name: "Spotify", color: "hover:text-emerald-400" }
+        };
+
+        function renderBioCard() {
+            // Text Info
+            document.getElementById('bio-name').innerText = config.name || "UNNAMED";
+            document.getElementById('bio-avatar').src = config.avatar || DEFAULT_CONFIG.avatar;
+            document.getElementById('bio-description').innerText = config.bio || "";
+
+            // Typing Restart
+            charIdx = 0;
+            typeIdx = 0;
+            isDeleting = false;
+            startTypingEffect();
+
+            // Render Dynamic Social Icons (Rule: Only render if valid URL)
+            const socialContainer = document.getElementById('social-links-container');
+            socialContainer.innerHTML = '';
+
+            Object.keys(config.socials).forEach(key => {
+                const url = config.socials[key];
+                if (url && url.trim() !== '' && url.trim() !== '#') {
+                    const item = SOCIAL_ICONS[key];
+                    if (item) {
+                        const a = document.createElement('a');
+                        a.href = url;
+                        a.target = "_blank";
+                        a.rel = "noopener noreferrer";
+                        a.title = item.name;
+                        a.className = `w-9 h-9 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-gray-300 ${item.color} hover:border-purple-500/50 hover:bg-purple-500/10 transition-all hover:scale-110`;
+                        a.innerHTML = `<i class="${item.icon}"></i>`;
+                        socialContainer.appendChild(a);
+                    }
+                }
+            });
+
+            // Render Custom Buttons
+            const customContainer = document.getElementById('custom-links-container');
+            customContainer.innerHTML = '';
+
+            (config.customLinks || []).forEach(link => {
+                if (link.url && link.title) {
+                    const a = document.createElement('a');
+                    a.href = link.url;
+                    a.target = "_blank";
+                    a.rel = "noopener noreferrer";
+                    a.className = "glass-button w-full py-3 px-4 rounded-xl flex items-center justify-between group";
+                    a.innerHTML = `
+                        <div class="flex items-center gap-3">
+                            <div class="w-9 h-9 rounded-lg bg-purple-500/10 border border-purple-500/30 flex items-center justify-center text-purple-400 group-hover:scale-110 transition-transform">
+                                <i class="${link.icon || 'fa-solid fa-link'}"></i>
+                            </div>
+                            <span class="text-sm font-semibold text-gray-200 group-hover:text-white transition-colors">${link.title}</span>
+                        </div>
+                        <i class="fa-solid fa-arrow-up-right-from-square text-xs text-gray-500 group-hover:text-purple-400 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-all"></i>
+                    `;
+                    customContainer.appendChild(a);
+                }
+            });
+
+            setupAudio();
+        }
+
+
+        /* ===================================================
+           6. SETTINGS MODAL & CUSTOMIZER CONTROLS
+           =================================================== */
+        const settingsModal = document.getElementById('settings-modal');
+        const openSettingsBtn = document.getElementById('open-settings-btn');
+        const closeSettingsBtn = document.getElementById('close-settings-btn');
+        const saveSettingsBtn = document.getElementById('save-settings-btn');
+        const resetSettingsBtn = document.getElementById('reset-settings-btn');
+        const exportJsonBtn = document.getElementById('export-json-btn');
+        const addCustomLinkBtn = document.getElementById('add-custom-link-btn');
+
+        function openModal() {
+            populateModalInputs();
+            settingsModal.classList.remove('opacity-0', 'pointer-events-none');
+        }
+
+        function closeModal() {
+            settingsModal.classList.add('opacity-0', 'pointer-events-none');
+        }
+
+        function populateModalInputs() {
+            document.getElementById('setting-name').value = config.name || '';
+            document.getElementById('setting-avatar').value = config.avatar || '';
+            document.getElementById('setting-typing').value = (config.typing || []).join(', ');
+            document.getElementById('setting-bio').value = config.bio || '';
+            document.getElementById('setting-3d-mode').value = config.bgMode || 'cyber-grid';
+            document.getElementById('setting-bg-url').value = config.bgUrl || '';
+            document.getElementById('setting-audio-url').value = config.audioUrl || '';
+            document.getElementById('setting-audio-volume').value = config.audioVolume || 0.5;
+
+            // Social inputs
+            Object.keys(config.socials).forEach(key => {
+                const el = document.getElementById(`soc-${key}`);
+                if (el) el.value = config.socials[key] || '';
+            });
+
+            renderCustomLinksEditor();
+        }
+
+        function renderCustomLinksEditor() {
+            const list = document.getElementById('custom-links-editor-list');
+            list.innerHTML = '';
+
+            (config.customLinks || []).forEach((item, idx) => {
+                const row = document.createElement('div');
+                row.className = "p-2.5 rounded-xl bg-black/40 border border-white/10 flex flex-col gap-2";
+                row.innerHTML = `
+                    <div class="flex items-center gap-2">
+                        <input type="text" value="${item.title}" data-index="${idx}" data-field="title" placeholder="Tiêu đề nút" class="custom-btn-input w-1/2 bg-black/60 border border-white/10 rounded-lg px-2.5 py-1 text-xs text-white">
+                        <input type="text" value="${item.url}" data-index="${idx}" data-field="url" placeholder="URL Liên kết" class="custom-btn-input w-1/2 bg-black/60 border border-white/10 rounded-lg px-2.5 py-1 text-xs text-white">
+                        <button class="delete-custom-link-btn text-red-400 hover:text-red-300 p-1" data-index="${idx}">
+                            <i class="fa-solid fa-trash-can"></i>
+                        </button>
+                    </div>
+                `;
+                list.appendChild(row);
+            });
+
+            // Add delete listeners
+            document.querySelectorAll('.delete-custom-link-btn').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    const idx = parseInt(e.currentTarget.getAttribute('data-index'));
+                    config.customLinks.splice(idx, 1);
+                    renderCustomLinksEditor();
+                });
+            });
+        }
+
+        addCustomLinkBtn.addEventListener('click', () => {
+            config.customLinks.push({
+                id: Date.now().toString(),
+                title: "Nút Liên Kết Mới",
+                url: "https://example.com",
+                icon: "fa-solid fa-link"
+            });
+            renderCustomLinksEditor();
+        });
+
+        // Audio Preset selector change handler
+        document.getElementById('setting-audio-preset').addEventListener('change', (e) => {
+            if (e.target.value) {
+                document.getElementById('setting-audio-url').value = e.target.value;
+            }
+        });
+
+        saveSettingsBtn.addEventListener('click', () => {
+            config.name = document.getElementById('setting-name').value;
+            config.avatar = document.getElementById('setting-avatar').value;
+            config.bio = document.getElementById('setting-bio').value;
+            
+            const rawTyping = document.getElementById('setting-typing').value;
+            config.typing = rawTyping.split(',').map(s => s.trim()).filter(s => s.length > 0);
+
+            config.bgMode = document.getElementById('setting-3d-mode').value;
+            config.bgUrl = document.getElementById('setting-bg-url').value;
+            config.audioUrl = document.getElementById('setting-audio-url').value;
+            config.audioVolume = parseFloat(document.getElementById('setting-audio-volume').value);
+
+            // Read Socials
+            Object.keys(config.socials).forEach(key => {
+                const el = document.getElementById(`soc-${key}`);
+                if (el) config.socials[key] = el.value.trim();
+            });
+
+            // Read Custom Buttons
+            const inputs = document.querySelectorAll('.custom-btn-input');
+            inputs.forEach(inp => {
+                const idx = parseInt(inp.getAttribute('data-index'));
+                const field = inp.getAttribute('data-field');
+                if (config.customLinks[idx]) {
+                    config.customLinks[idx][field] = inp.value.trim();
+                }
+            });
+
+            saveConfig();
+            closeModal();
+        });
+
+        resetSettingsBtn.addEventListener('click', () => {
+            if (confirm("Khôi phục tất cả cấu hình về mặc định?")) {
+                config = JSON.parse(JSON.stringify(DEFAULT_CONFIG));
+                saveConfig();
+                populateModalInputs();
+            }
+        });
+
+        exportJsonBtn.addEventListener('click', () => {
+            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(config, null, 2));
+            const dlAnchor = document.createElement('a');
+            dlAnchor.setAttribute("href", dataStr);
+            dlAnchor.setAttribute("download", "cyber_bio_config.json");
+            document.body.appendChild(dlAnchor);
+            dlAnchor.click();
+            dlAnchor.remove();
+            showToast("Đã tải xuống file JSON cấu hình!");
+        });
+
+        openSettingsBtn.addEventListener('click', openModal);
+        closeSettingsBtn.addEventListener('click', closeModal);
+
+
+        /* ===================================================
+           7. UTILITIES & TOAST NOTIFICATION
+           =================================================== */
+        const toast = document.getElementById('toast');
+        const toastMsg = document.getElementById('toast-message');
+
+        function showToast(msg) {
+            toastMsg.textContent = msg;
+            toast.classList.remove('opacity-0', '-translate-y-20');
+            toast.classList.add('opacity-100', 'translate-y-0');
+            setTimeout(() => {
+                toast.classList.remove('opacity-100', 'translate-y-0');
+                toast.classList.add('opacity-0', '-translate-y-20');
+            }, 2500);
+        }
+
+        document.getElementById('share-btn').addEventListener('click', () => {
+            const dummy = window.location.href;
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+                navigator.clipboard.writeText(dummy).then(() => showToast("Đã sao chép liên kết Bio!"));
+            } else {
+                showToast("Đã sao chép liên kết!");
+            }
+        });
+
+
+        /* ===================================================
+           8. INIT ON LOAD
+           =================================================== */
+        window.onload = function() {
+            initThreeJS();
+            update3DBackground();
+            animate3D();
+            renderBioCard();
+        };
+    </script>
+</body>
+</html>
