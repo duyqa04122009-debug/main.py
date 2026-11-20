@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<title>Gia Phả Dòng Tộc</title>
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<style>
+:root{--bg:#1c2b30;--bar:#142024;--ink:#eef2ee;--mute:#9fb3b0;--gold:#f3c969;--nam:#6fb3e8;--nu:#f2a1c2;--dead:#7b8588;--line:#5d7a78}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent;user-select:none}
+html,body{margin:0;height:100%;background:var(--bg);color:var(--ink);font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;overflow:hidden;overscroll-behavior:none}
+#top{position:fixed;left:0;right:0;top:0;z-index:5;display:flex;align-items:center;gap:8px;padding:calc(env(safe-area-inset-top,0px) + 8px) 10px 8px;background:var(--bar)}
+#top .date{flex:1;text-align:center;font-weight:700;font-size:15px}
+.chip{background:#ffffff14;border-radius:14px;padding:6px 10px;font-weight:700;font-size:14px;white-space:nowrap}
+button{font:inherit;color:inherit;border:0;cursor:pointer}
+.ib{width:46px;height:46px;border-radius:14px;background:#ffffff14;font-size:22px;position:relative}
+#side{position:fixed;right:8px;top:50%;transform:translateY(-50%);z-index:5;display:flex;flex-direction:column;gap:10px}
+#tree{position:fixed;inset:0;width:100%;height:100%;touch-action:none}
+#fit{position:fixed;left:8px;bottom:calc(env(safe-area-inset-bottom,0px) + 10px);z-index:5}
+.dot{position:absolute;top:3px;right:3px;width:12px;height:12px;border-radius:50%;background:#ff4d4d;border:2px solid var(--bar)}
+.hide{display:none!important}
+.ov{position:fixed;inset:0;z-index:20;background:#000a;display:flex;align-items:center;justify-content:center;padding:20px}
+.box{background:#26393f;border-radius:20px;padding:20px;width:100%;max-width:380px;max-height:80vh;overflow:auto}
+.box h2{margin:0 0 14px;font-size:20px;text-align:center}
+.row{display:flex;gap:12px}
+.big{flex:1;padding:22px 8px;border-radius:18px;font-size:18px;font-weight:800;color:#12202a}
+.big span{display:block;font-size:44px}
+.opt{display:flex;justify-content:space-between;align-items:center;padding:12px 4px;border-bottom:1px solid #ffffff18}
+.btn{display:block;width:100%;margin-top:12px;padding:13px;border-radius:14px;background:var(--gold);color:#2a2208;font-weight:800;font-size:16px}
+.btn.alt{background:#ffffff1c;color:var(--ink)}
+.tg{width:50px;height:28px;border-radius:14px;background:#ffffff30;position:relative}
+.tg::after{content:"";position:absolute;top:3px;left:3px;width:22px;height:22px;border-radius:50%;background:#fff;transition:.2s}
+.tg.on{background:#58b886}.tg.on::after{left:25px}
+.log{font-size:14px;line-height:1.45;padding:7px 0;border-bottom:1px solid #ffffff14}
+.log b{color:var(--gold)}
+#toast{position:fixed;left:50%;bottom:calc(env(safe-area-inset-bottom,0px) + 70px);transform:translateX(-50%);z-index:30;background:#000c;padding:10px 16px;border-radius:14px;font-size:14px;max-width:80%;text-align:center}
+.pop{animation:pop .6s ease-out}
+@keyframes pop{0%{transform:scale(.2)}60%{transform:scale(1.25)}100%{transform:scale(1)}}
+.node text{pointer-events:none}
+@media (prefers-reduced-motion:reduce){.pop{animation:none}}
+</style>
+</head>
+<body>
+
+<div id="top">
+  <button class="ib" id="bSet" aria-label="Cài đặt">⚙️</button>
+  <div class="date" id="date">--/--/----</div>
+  <div class="chip">💎 <span id="dia">0</span></div>
+  <div class="chip">🪙 <span id="coin">0</span></div>
+</div>
+
+<svg id="tree"><g id="world"></g></svg>
+
+<div id="side">
+  <button class="ib" id="bGift" aria-label="Quà hằng ngày">🎁<span class="dot" id="giftDot"></span></button>
+  <button class="ib" id="bAds" aria-label="Gói không quảng cáo">🚫</button>
+  <button class="ib" id="bLog" aria-label="Nhật ký gia tộc">📜</button>
+</div>
+<button class="ib" id="fit" aria-label="Căn giữa cây">🎯</button>
+
+<!-- Chọn giới tính -->
+<div class="ov" id="start">
+  <div class="box">
+    <h2>Bắt đầu dòng tộc của bạn</h2>
+    <div class="row">
+      <button class="big" style="background:var(--nam)" data-g="m"><span>♂</span>Nam</button>
+      <button class="big" style="background:var(--nu)" data-g="f"><span>♀</span>Nữ</button>
+    </div>
+  </div>
+</div>
+
+<div class="ov hide" id="modal"><div class="box" id="mbox"></div></div>
+<div id="toast" class="hide"></div>
+
+<script>
+/* =====================================================
+   CẤU HÌNH — chỉnh các thông số ở đây
+   ===================================================== */
+const CFG = {
+  YEAR_SECONDS: 25,        // 1 năm game = bao nhiêu giây thật (20-30)
+  START_YEAR: 2000,        // năm bắt đầu
+  START_AGE: 18,           // tuổi nhân vật đầu tiên
+  MARRY_AGE_MIN: 25,       // tuổi kết hôn thấp nhất
+  MARRY_AGE_MAX: 30,       // tuổi kết hôn cao nhất
+  BIRTH_CHANCE: 0.28,      // xác suất sinh con mỗi năm (trước khi nhân độ hòa hợp)
+  BIRTH_AGE_MIN: 20,       // tuổi sinh con của người mẹ
+  BIRTH_AGE_MAX: 40,
+  MAX_CHILDREN: 4,         // số con tối đa mỗi cặp
+  INCOME_BASE: 2,          // thu nhập/giây cơ bản của người đi làm
+  WORK_AGE_MIN: 18,        // tuổi bắt đầu kiếm tiền
+  RETIRE_AGE: 62,          // tuổi nghỉ hưu (thu nhập giảm)
+  RETIRE_RATE: 0.35,       // tỉ lệ thu nhập khi nghỉ hưu
+  START_COINS: 100,
+  GIFT_COINS: 500,         // quà đăng nhập hằng ngày
+  GIFT_DIAMONDS: 5,
+  OFFLINE_CAP_HOURS: 8,    // tối đa tính tiền offline
+  AUTOSAVE_SECONDS: 5
+};
+const SAVE_KEY = 'giapha_v1';
+
+/* =====================================================
+   LƯU TRỮ: Telegram CloudStorage, dự phòng localStorage
+   ===================================================== */
+const TG = window.Telegram && Telegram.WebApp && Telegram.WebApp.initData !== undefined ? Telegram.WebApp : null;
+if (TG) { try { TG.ready(); TG.expand(); } catch (e) {} }
+const Store = {
+  get(cb){
+    const local = () => { try { cb(localStorage.getItem(SAVE_KEY)); } catch (e) { cb(null); } };
+    if (TG && TG.CloudStorage && TG.isVersionAtLeast && TG.isVersionAtLeast('6.9')) {
+      TG.CloudStorage.getItem(SAVE_KEY, (err, v) => (err || !v) ? local() : cb(v));
+    } else local();
+  },
+  set(s){
+    try { localStorage.setItem(SAVE_KEY, s); } catch (e) {}
+    if (TG && TG.CloudStorage && TG.isVersionAtLeast && TG.isVersionAtLeast('6.9')) {
+      try { TG.CloudStorage.setItem(SAVE_KEY, s); } catch (e) {}
+    }
+  },
+  clear(){
+    try { localStorage.removeItem(SAVE_KEY); } catch (e) {}
+    if (TG && TG.CloudStorage) { try { TG.CloudStorage.removeItem(SAVE_KEY); } catch (e) {} }
+  }
+};
+
+/* =====================================================
+   TRẠNG THÁI GAME
+   ===================================================== */
+let S = null;          // toàn bộ dữ liệu lưu
+let dirty = true;      // cần vẽ lại cây
+let lastBornId = null;
+const $ = id => document.getElementById(id);
+const rnd = (a, b) => a + Math.random() * (b - a);
+const rint = (a, b) => Math.floor(rnd(a, b + 1));
+const pick = a => a[Math.floor(Math.random() * a.length)];
+
+const HO = ['Nguyễn','Trần','Lê','Phạm','Hoàng','Vũ','Đặng','Bùi'];
+const NAM = ['Minh','Hùng','Dũng','Khoa','Phong','Nam','Quang','Long','Tuấn','Bảo'];
+const NU = ['Lan','Hoa','Mai','Linh','Thu','Hà','Ngọc','Trang','Vy','Phương'];
+
+function newPerson(g, born, parents, ho){
+  const id = S.nextId++;
+  const p = { id, g, born, dead: false, parents: parents || [], children: [], spouse: null, harmony: 0,
+    marryAge: rint(CFG.MARRY_AGE_MIN, CFG.MARRY_AGE_MAX), edu: rint(0, 2),
+    name: (ho || pick(HO)) + ' ' + pick(g === 'm' ? NAM : NU) };
+  S.people[id] = p;
+  return p;
+}
+const age = p => Math.floor(S.t - p.born);
+
+function newGame(g){
+  S = { t: 0, nextId: 1, people: {}, root: 1, coins: CFG.START_COINS, diamonds: 0,
+    log: [], lastGift: '', lastSave: Date.now(), settings: { music: true, sfx: true } };
+  const r = newPerson(g, -CFG.START_AGE, []);
+  r.name = 'Tổ tiên ' + r.name;
+  addLog(`Dòng tộc khởi đầu với <b>${r.name}</b> (${CFG.START_AGE} tuổi).`);
+  dirty = true; save();
+}
+
+/* =====================================================
+   THỜI GIAN
+   ===================================================== */
+const CUM = [0,31,59,90,120,151,181,212,243,273,304,334,365];
+function dateOf(t){
+  const y = CFG.START_YEAR + Math.floor(t);
+  const d = Math.floor((t - Math.floor(t)) * 365);
+  let m = 11; while (CUM[m] > d) m--;
+  return { d: d - CUM[m] + 1, m: m + 1, y };
+}
+const dateStr = t => { const x = dateOf(t); return `${String(x.d).padStart(2,'0')}/${String(x.m).padStart(2,'0')}/${x.y}`; };
+function addLog(html){ S.log.unshift(`<b>${dateStr(S.t)}</b> — ${html}`); if (S.log.length > 300) S.log.pop(); }
+
+/* =====================================================
+   SỰ KIỆN HẰNG NĂM (chạy khi qua 1 năm game)
+   ===================================================== */
+function yearly(){
+  const alive = Object.values(S.people).filter(p => !p.dead);
+  for (const p of alive) {
+    const a = age(p);
+    // Tử vong: tăng dần theo tuổi
+    const pd = a < 55 ? 0.002 : Math.min(0.9, 0.01 * Math.pow(1.13, a - 55));
+    if (Math.random() < pd) { p.dead = true; addLog(`<b>${p.name}</b> đã qua đời ở tuổi ${a}.`); dirty = true; continue; }
+    // Kết hôn tự động (bản đầu, chưa có bảng sự kiện)
+    if (!p.spouse && !p.isSpouse && a >= p.marryAge) marry(p);
+  }
+  // Sinh con
+  for (const p of Object.values(S.people)) {
+    if (p.dead || p.g !== 'f' || !p.spouse) continue;
+    const h = S.people[p.spouse];
+    if (!h || h.dead) continue;
+    const blood = p.isSpouse ? h : p;
+    const a = age(p);
+    if (a < CFG.BIRTH_AGE_MIN || a > CFG.BIRTH_AGE_MAX || blood.children.length >= CFG.MAX_CHILDREN) continue;
+    const harm = p.isSpouse ? p.harmony : h.harmony;
+    if (Math.random() < CFG.BIRTH_CHANCE * (0.5 + harm / 100)) {
+      const c = newPerson(Math.random() < 0.5 ? 'm' : 'f', S.t, [blood.id, blood.spouse], blood.name.split(' ').slice(-2, -1)[0] || undefined);
+      blood.children.push(c.id);
+      lastBornId = c.id;
+      addLog(`<b>${blood.name}</b> và vợ/chồng chào đón <b>${c.name}</b>.`);
+      dirty = true;
+    }
+  }
+  save();
+  if (!Object.values(S.people).some(p => !p.dead)) toast('Dòng tộc đã tuyệt tự. Vào Cài đặt để chơi lại.');
+}
+
+function marry(p){
+  const sp = newPerson(p.g === 'm' ? 'f' : 'm', p.born + rint(-3, 3), []);
+  sp.isSpouse = true; sp.edu = rint(1, 3);
+  const h = rint(50, 95);
+  p.spouse = sp.id; sp.spouse = p.id; p.harmony = h; sp.harmony = h;
+  addLog(`<b>${p.name}</b> kết hôn với <b>${sp.name}</b> (hòa hợp ${h}%).`);
+  dirty = true;
+}
+
+/* =====================================================
+   KINH TẾ
+   ===================================================== */
+function income(p){
+  if (p.dead) return 0;
+  const a = age(p);
+  if (a < CFG.WORK_AGE_MIN) return 0;
+  // Học vấn: bản đầu gán ngẫu nhiên lúc sinh, sẽ nâng cấp khi thêm mục "Học hành"
+  const edu = 1 + 0.4 * p.edu;
+  const ageF = a < 30 ? 0.7 : a < CFG.RETIRE_AGE ? 1 : CFG.RETIRE_RATE;
+  const harm = p.spouse ? 0.8 + 0.4 * p.harmony / 100 : 1;
+  return CFG.INCOME_BASE * edu * ageF * harm;
+}
+const totalIncome = () => Object.values(S.people).reduce((s, p) => s + income(p), 0);
+function fmt(n){
+  if (n >= 1e9) return (n / 1e9).toFixed(1) + 'B';
+  if (n >= 1e6) return (n / 1e6).toFixed(1) + 'M';
+  if (n >= 1e4) return (n / 1e3).toFixed(1) + 'K';
+  return Math.floor(n).toString();
+}
+const fmtRate = n => n >= 10 ? Math.round(n) : (Math.round(n * 10) / 10);
+
+/* =====================================================
+   VẼ CÂY GIA PHẢ (SVG)
+   ===================================================== */
+const R = 28, GAP = 70, LEVEL_H = 160, MIN_W = 96;
+let pos = {}, view = { x: 0, y: 0, s: 1 }, bounds = null;
+
+function unitW(p){
+  const own = p.spouse ? GAP + MIN_W : MIN_W;
+  const kids = p.children.reduce((s, id) => s + unitW(S.people[id]), 0);
+  return Math.max(own, kids);
+}
+function place(p, xc, depth){
+  const y = depth * LEVEL_H;
+  if (p.spouse) { pos[p.id] = { x: xc - GAP / 2, y }; pos[p.spouse] = { x: xc + GAP / 2, y }; }
+  else pos[p.id] = { x: xc, y };
+  let x = xc - unitW(p) / 2;
+  for (const id of p.children) { const c = S.people[id], w = unitW(c); place(c, x + w / 2, depth + 1); x += w; }
+}
+function colorOf(p){ return p.dead ? 'var(--dead)' : p.g === 'm' ? 'var(--nam)' : 'var(--nu)'; }
+
+function render(){
+  pos = {}; place(S.people[S.root], 0, 0);
+  let out = '', nodes = '';
+  const ps = Object.values(S.people);
+  // Đường nối: từ cả cha và mẹ xuống con (hai đường hội tụ)
+  for (const c of ps) {
+    if (!c.parents.length) continue;
+    const to = pos[c.id];
+    for (const pid of c.parents) {
+      const f = pos[pid]; if (!f) continue;
+      const my = (f.y + to.y) / 2 + R * 0.4;
+      out += `<path d="M${f.x} ${f.y + R} C${f.x} ${my},${to.x} ${my},${to.x} ${to.y - R}" fill="none" stroke="var(--line)" stroke-width="2.5"/>`;
+    }
+  }
+  // Trái tim hòa hợp giữa vợ chồng
+  for (const p of ps) {
+    if (!p.spouse || p.isSpouse) continue;
+    const a = pos[p.id], b = pos[p.spouse];
+    out += `<line x1="${a.x + R}" y1="${a.y}" x2="${b.x - R}" y2="${b.y}" stroke="var(--line)" stroke-width="2"/>`;
+    out += `<g transform="translate(${(a.x + b.x) / 2},${a.y})"><text y="6" text-anchor="middle" font-size="22">❤️</text><text y="-14" text-anchor="middle" font-size="11" fill="#ffd9d9" font-weight="700">${p.harmony}%</text></g>`;
+  }
+  // Vòng tròn nhân vật
+  for (const p of ps) {
+    const q = pos[p.id]; if (!q) continue;
+    nodes += `<g class="node${p.id === lastBornId ? ' pop' : ''}" style="transform-origin:${q.x}px ${q.y}px">
+      <circle cx="${q.x}" cy="${q.y}" r="${R}" fill="${colorOf(p)}" stroke="#ffffff55" stroke-width="2"/>
+      <text x="${q.x}" y="${q.y + 6}" text-anchor="middle" font-size="18" font-weight="800" fill="#10202a" id="a${p.id}">${age(p)}</text>
+      <text x="${q.x}" y="${q.y + R + 14}" text-anchor="middle" font-size="11" fill="var(--ink)">${p.name.split(' ').slice(-1)[0]}</text>
+      <text x="${q.x}" y="${q.y + R + 29}" text-anchor="middle" font-size="12" font-weight="700" fill="var(--gold)" id="i${p.id}">${p.dead ? '' : '+' + fmtRate(income(p)) + '/s'}</text>
+    </g>`;
+  }
+  $('world').innerHTML = out + nodes;
+  const xs = Object.values(pos).map(v => v.x), ys = Object.values(pos).map(v => v.y);
+  bounds = { x0: Math.min(...xs) - 70, x1: Math.max(...xs) + 70, y0: Math.min(...ys) - 70, y1: Math.max(...ys) + 90 };
+  lastBornId = null; dirty = false;
+}
+// Cập nhật chữ nhẹ (tuổi, thu nhập) mà không vẽ lại cả cây
+function refreshText(){
+  for (const p of Object.values(S.people)) {
+    const a = $('a' + p.id), i = $('i' + p.id);
+    if (a) a.textContent = age(p);
+    if (i) i.textContent = p.dead ? '' : '+' + fmtRate(income(p)) + '/s';
+  }
+}
+function applyView(){ $('world').setAttribute('transform', `translate(${view.x},${view.y}) scale(${view.s})`); }
+function fitView(){
+  if (!bounds) return;
+  const W = innerWidth, H = innerHeight - 70, bw = bounds.x1 - bounds.x0, bh = bounds.y1 - bounds.y0;
+  view.s = Math.min(1.1, W / bw, H / bh);
+  view.x = W / 2 - (bounds.x0 + bw / 2) * view.s;
+  view.y = 70 + H / 2 - (bounds.y0 + bh / 2) * view.s;
+  applyView();
+}
+
+/* Kéo và thu phóng: 1 ngón kéo, 2 ngón pinch, lăn chuột để zoom */
+const ptrs = new Map(); let lastDist = 0;
+const svg = $('tree');
+svg.addEventListener('pointerdown', e => { svg.setPointerCapture(e.pointerId); ptrs.set(e.pointerId, { x: e.clientX, y: e.clientY }); lastDist = 0; });
+svg.addEventListener('pointerup', e => ptrs.delete(e.pointerId));
+svg.addEventListener('pointercancel', e => ptrs.delete(e.pointerId));
+svg.addEventListener('pointermove', e => {
+  const p = ptrs.get(e.pointerId); if (!p) return;
+  if (ptrs.size === 1) { view.x += e.clientX - p.x; view.y += e.clientY - p.y; }
+  p.x = e.clientX; p.y = e.clientY;
+  if (ptrs.size === 2) {
+    const [a, b] = [...ptrs.values()], d = Math.hypot(a.x - b.x, a.y - b.y);
+    if (lastDist) zoomAt((a.x + b.x) / 2, (a.y + b.y) / 2, d / lastDist);
+    lastDist = d;
+  }
+  applyView();
+});
+svg.addEventListener('wheel', e => { e.preventDefault(); zoomAt(e.clientX, e.clientY, e.deltaY < 0 ? 1.1 : 0.9); applyView(); }, { passive: false });
+function zoomAt(cx, cy, f){
+  const ns = Math.max(0.15, Math.min(3, view.s * f)), k = ns / view.s;
+  view.x = cx - (cx - view.x) * k; view.y = cy - (cy - view.y) * k; view.s = ns;
+}
+
+/* =====================================================
+   GIAO DIỆN: bảng, cài đặt, quà, nhật ký
+   ===================================================== */
+function toast(msg){
+  const t = $('toast'); t.textContent = msg; t.classList.remove('hide');
+  clearTimeout(toast.h); toast.h = setTimeout(() => t.classList.add('hide'), 2200);
+}
+function openModal(html){ $('mbox').innerHTML = html; $('modal').classList.remove('hide'); }
+function closeModal(){ $('modal').classList.add('hide'); }
+$('modal').addEventListener('click', e => { if (e.target.id === 'modal' || e.target.dataset.close) closeModal(); });
+
+$('bSet').onclick = () => {
+  const row = (k, label) => `<div class="opt"><span>${label}</span><button class="tg ${S.settings[k] ? 'on' : ''}" data-k="${k}"></button></div>`;
+  openModal(`<h2>Cài đặt</h2>${row('music', '🎵 Nhạc nền')}${row('sfx', '🔔 Hiệu ứng âm thanh')}
+    <div class="opt"><span>🌐 Ngôn ngữ</span><span>Tiếng Việt</span></div>
+    <button class="btn alt" id="bClear">🗑️ Xóa dữ liệu, chơi lại</button><button class="btn" data-close="1">Đóng</button>`);
+  document.querySelectorAll('.tg').forEach(b => b.onclick = () => { S.settings[b.dataset.k] = !S.settings[b.dataset.k]; b.classList.toggle('on'); save(); });
+  $('bClear').onclick = () => { if (confirm('Xóa toàn bộ tiến trình?')) { Store.clear(); location.reload(); } };
+};
+$('bLog').onclick = () => openModal(`<h2>Nhật ký gia tộc</h2>${S.log.map(l => `<div class="log">${l}</div>`).join('')}<button class="btn" data-close="1">Đóng</button>`);
+$('bAds').onclick = () => toast('Gói không quảng cáo: sẽ có ở bản sau');
+
+const today = () => new Date().toDateString();
+function updateGiftDot(){ $('giftDot').classList.toggle('hide', S.lastGift === today()); }
+$('bGift').onclick = () => {
+  if (S.lastGift === today()) { toast('Hôm nay bạn đã nhận quà rồi'); return; }
+  S.lastGift = today(); S.coins += CFG.GIFT_COINS; S.diamonds += CFG.GIFT_DIAMONDS;
+  updateGiftDot(); toast(`Nhận ${CFG.GIFT_COINS} 🪙 và ${CFG.GIFT_DIAMONDS} 💎`); save();
+};
+$('fit').onclick = fitView;
+
+document.querySelectorAll('#start .big').forEach(b => b.onclick = () => { newGame(b.dataset.g); $('start').classList.add('hide'); begin(); });
+
+/* =====================================================
+   VÒNG LẶP CHÍNH
+   ===================================================== */
+let prev = 0, lastYear = 0, saveAcc = 0, shownCoins = -1;
+function loop(ts){
+  const dt = Math.min(0.25, (ts - prev) / 1000 || 0); prev = ts;
+  if (S) {
+    S.t += dt / CFG.YEAR_SECONDS;
+    S.coins += totalIncome() * dt;
+    const y = Math.floor(S.t);
+    while (lastYear < y) { lastYear++; yearly(); refreshText(); }
+    if (dirty) { render(); if (!loop.fitted) { fitView(); loop.fitted = true; } }
+    $('date').textContent = dateStr(S.t);
+    const c = fmt(S.coins); if (c !== shownCoins) { $('coin').textContent = c; shownCoins = c; }
+    $('dia').textContent = fmt(S.diamonds);
+    if ((saveAcc += dt) >= CFG.AUTOSAVE_SECONDS) { saveAcc = 0; save(); refreshText(); }
+  }
+  requestAnimationFrame(loop);
+}
+function save(){ if (!S) return; S.lastSave = Date.now(); Store.set(JSON.stringify(S)); }
+function begin(){ lastYear = Math.floor(S.t); updateGiftDot(); dirty = true; loop.fitted = false; }
+
+/* Tải dữ liệu cũ và tính tiền offline */
+Store.get(raw => {
+  if (raw) {
+    try {
+      S = JSON.parse(raw);
+      const secs = Math.min((Date.now() - S.lastSave) / 1000, CFG.OFFLINE_CAP_HOURS * 3600);
+      const gain = totalIncome() * secs;
+      if (gain > 1) { S.coins += gain; setTimeout(() => toast(`Khi bạn vắng mặt, gia tộc kiếm được ${fmt(gain)} 🪙`), 400); }
+      $('start').classList.add('hide'); begin();
+    } catch (e) { S = null; }
+  }
+});
+requestAnimationFrame(loop);
+addEventListener('beforeunload', save);
+document.addEventListener('visibilitychange', () => { if (document.hidden) save(); });
+addEventListener('resize', () => { if (S) fitView(); });
+</script>
+</body>
+</html>
