@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>VIETDUB AI</title>
+<style>
+:root{--bg:#f5f7ff;--card:#fff;--text:#1b1f3b;--muted:#6b7280;--blue:#2563eb;--purple:#7c3aed;--border:#e0e4f5}
+@media (prefers-color-scheme:dark){:root{--bg:#0f1226;--card:#191d3a;--text:#eef0ff;--muted:#9aa3c7;--border:#2b3060}}
+*{box-sizing:border-box}
+body{margin:0;font-family:system-ui,sans-serif;background:var(--bg);color:var(--text)}
+header{background:linear-gradient(135deg,var(--blue),var(--purple));color:#fff;padding:16px;display:flex;justify-content:space-between;align-items:center}
+header h1{margin:0;font-size:20px}
+main{max-width:560px;margin:0 auto;padding:16px}
+.card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:16px;margin-bottom:16px}
+h2{margin:0 0 12px;font-size:17px}
+input{width:100%;padding:12px;margin:6px 0;border-radius:10px;border:1px solid var(--border);background:var(--bg);color:var(--text);font-size:16px}
+button{padding:12px 16px;border:0;border-radius:10px;background:linear-gradient(135deg,var(--blue),var(--purple));color:#fff;font-size:16px;cursor:pointer;margin:4px 4px 4px 0}
+button.ghost{background:transparent;color:var(--blue);border:1px solid var(--border)}
+header button{background:rgba(255,255,255,.2);margin:0}
+.msg{margin-top:8px;font-size:14px}.err{color:#dc2626}.ok{color:#16a34a}
+.item{padding:10px 0;border-bottom:1px solid var(--border)}.item small{color:var(--muted)}
+.hidden{display:none}
+</style>
+</head>
+<body>
+<header><h1>VIETDUB AI</h1><button id="btnLogout" class="hidden">Đăng xuất</button></header>
+<main>
+  <div id="authView" class="card">
+    <h2>Đăng nhập / Đăng ký</h2>
+    <input id="email" type="email" placeholder="Email" autocomplete="email">
+    <input id="password" type="password" placeholder="Mật khẩu (tối thiểu 6 ký tự)" autocomplete="current-password">
+    <button id="btnLogin">Đăng nhập</button>
+    <button id="btnSignup" class="ghost">Đăng ký</button>
+    <button id="btnReset" class="ghost">Quên mật khẩu</button>
+    <div id="authMsg" class="msg"></div>
+  </div>
+
+  <div id="appView" class="hidden">
+    <div class="card">
+      <h2>Tạo dự án mới</h2>
+      <input id="projName" placeholder="Tên dự án">
+      <button id="btnCreate">Tạo dự án</button>
+      <div id="createMsg" class="msg"></div>
+    </div>
+    <div class="card">
+      <h2>Dự án của tôi</h2>
+      <div id="projList">Đang tải...</div>
+    </div>
+  </div>
+</main>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
+<script>
+const SUPABASE_URL = "https://jjzxvvrdsdghzwbslzym.supabase.co";
+const SUPABASE_KEY = "sb_publishable_FFnft_yALNS49pIR0OvEHg__Lp6ts-W";
+const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+const $ = id => document.getElementById(id);
+let currentUser = null;
+
+function say(el, text, ok){ el.textContent = text; el.className = "msg " + (ok ? "ok" : "err"); }
+
+async function render(){
+  const { data } = await sb.auth.getSession();
+  currentUser = data.session ? data.session.user : null;
+  $("authView").classList.toggle("hidden", !!currentUser);
+  $("appView").classList.toggle("hidden", !currentUser);
+  $("btnLogout").classList.toggle("hidden", !currentUser);
+  if (currentUser) loadProjects();
+}
+
+async function loadProjects(){
+  const { data, error } = await sb.from("projects").select("*").order("created_at", { ascending: false });
+  const box = $("projList");
+  if (error) { box.textContent = "Lỗi: " + error.message; return; }
+  if (!data.length) { box.textContent = "Chưa có dự án nào."; return; }
+  box.innerHTML = "";
+  data.forEach(p => {
+    const d = document.createElement("div");
+    d.className = "item";
+    const t = document.createElement("div"); t.textContent = p.name;
+    const s = document.createElement("small");
+    s.textContent = "Trạng thái: " + p.status + " · " + new Date(p.created_at).toLocaleString("vi-VN");
+    d.append(t, s); box.appendChild(d);
+  });
+}
+
+$("btnSignup").onclick = async () => {
+  const { data, error } = await sb.auth.signUp({ email: $("email").value.trim(), password: $("password").value });
+  if (error) return say($("authMsg"), error.message, false);
+  if (data.session) say($("authMsg"), "Đăng ký thành công!", true);
+  else say($("authMsg"), "Đã đăng ký. Kiểm tra email để xác minh rồi đăng nhập.", true);
+  render();
+};
+$("btnLogin").onclick = async () => {
+  const { error } = await sb.auth.signInWithPassword({ email: $("email").value.trim(), password: $("password").value });
+  if (error) return say($("authMsg"), error.message, false);
+  render();
+};
+$("btnReset").onclick = async () => {
+  const email = $("email").value.trim();
+  if (!email) return say($("authMsg"), "Nhập email trước.", false);
+  const { error } = await sb.auth.resetPasswordForEmail(email, { redirectTo: location.origin });
+  say($("authMsg"), error ? error.message : "Đã gửi email đặt lại mật khẩu.", !error);
+};
+$("btnLogout").onclick = async () => { await sb.auth.signOut(); render(); };
+$("btnCreate").onclick = async () => {
+  const name = $("projName").value.trim();
+  if (!name) return say($("createMsg"), "Nhập tên dự án.", false);
+  const { error } = await sb.from("projects").insert({ name, user_id: currentUser.id });
+  if (error) return say($("createMsg"), error.message, false);
+  $("projName").value = ""; say($("createMsg"), "Đã tạo dự án.", true); loadProjects();
+};
+
+sb.auth.onAuthStateChange(() => render());
+render();
+</script>
+</body>
+</html>
