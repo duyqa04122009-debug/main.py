@@ -1,45 +1,43 @@
 <!doctype html>
-<html lang="vi"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no"><meta name="theme-color" content="#fff5f6"><title>DYNASTY · Royal Family</title>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>DYNASTY</title>
 <style>
-:root{--rose:#d88ca8;--deep:#71384f;--gold:#c99b57;--cream:#fff8f5}
-*{box-sizing:border-box}body{margin:0;background:#f9e9ed;color:var(--deep);font-family:Georgia,"Times New Roman",serif}.game{width:min(100%,1200px);min-height:100svh;margin:auto;position:relative;overflow:hidden;background:linear-gradient(180deg,#fbeef1 0%,#fff8f5 55%,#f7e7e7 100%);isolation:isolate}
-.game:before{content:"";position:absolute;inset:0;z-index:-1;background:radial-gradient(ellipse at 50% 40%,#fff9 0 22%,transparent 60%),linear-gradient(90deg,#f2d7dc55,transparent 20%,transparent 80%,#f2d7dc55)}
-.top{height:82px;display:flex;align-items:center;justify-content:space-between;padding:8px 16px;background:#fff9f3df;border-bottom:2px solid #e9c9c7;gap:10px}
-.brand{font-size:clamp(18px,3vw,30px);font-weight:bold;letter-spacing:2px;color:#b17d48;white-space:nowrap}.brand small{display:block;text-align:center;font-size:10px;letter-spacing:1px;font-weight:normal}
-.topright{display:flex;align-items:center;gap:8px;flex-wrap:wrap;justify-content:flex-end}.chip{border:1px solid #e9c4bc;background:#fff9f7;border-radius:28px;padding:9px 13px;box-shadow:0 2px 5px #bd8e8930;font:600 14px system-ui;white-space:nowrap}.chip b{font-family:Georgia;font-size:17px;color:#71384f}
-.layout{display:grid;grid-template-columns:112px 1fr 150px;gap:10px;padding:12px;min-height:calc(100svh - 82px);position:relative}
-.side{display:flex;flex-direction:column;gap:12px;align-items:center;padding-top:20px}.nav{width:88px;height:88px;border-radius:50%;border:2px solid #e8b9c6;background:linear-gradient(145deg,#fff,#f8dce5);box-shadow:inset 0 0 0 4px #fff9,0 4px 12px #c38b9b45;color:#8d5a6d;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;font-size:12px}.nav span{font-size:32px}
-.center{min-width:0;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;padding-top:14px}
-.couple{width:100%;display:flex;align-items:center;justify-content:center;gap:clamp(5px,2vw,25px);position:relative}.person{width:min(34%,245px);display:flex;flex-direction:column;align-items:center;z-index:1}.portrait{width:clamp(104px,23vw,230px);aspect-ratio:1;border-radius:50%;border:5px solid #f5d8bc;background:linear-gradient(145deg,#fbeaf0,#fff8f2);box-shadow:0 0 0 3px #fff,0 5px 18px #9d6d7933;overflow:hidden;position:relative}
-.face{position:absolute;inset:0;background-repeat:no-repeat;background-size:800% 600%;image-rendering:auto}
-.personlabel{margin-top:-3px;min-width:85%;text-align:center;border:2px solid #edc2c3;border-radius:9px 9px 20px 20px;background:linear-gradient(#fff9f6,#f8dfe4);padding:7px 5px;font:600 clamp(12px,2vw,19px) system-ui;box-shadow:0 3px 8px #b98a8930}
-.mood{font-size:20px;margin-top:2px}.love{font-size:clamp(30px,6vw,56px);color:#fff;text-shadow:0 2px 8px #c34e87;line-height:1;z-index:2;min-width:65px;text-align:center;filter:drop-shadow(0 3px 4px #e59bb3)}.love small{display:block;font-size:12px;color:#fff}
-.kids{width:100%;display:flex;justify-content:center;align-items:flex-start;gap:clamp(8px,3vw,35px);margin-top:42px;position:relative;padding-top:28px}.kids:before{content:"";position:absolute;top:8px;left:20%;right:20%;height:2px;background:#c99b67}.kids:after{content:"♥";position:absolute;top:-5px;left:50%;transform:translateX(-50%);background:#fff2e8;border:2px solid #e8c39d;border-radius:50%;width:28px;height:28px;text-align:center;color:#d58ba0;line-height:24px}.kid{display:flex;flex-direction:column;align-items:center;width:clamp(72px,17%,130px);z-index:1}.kid .portrait{width:clamp(70px,13vw,130px);border-width:4px}.kid .personlabel{font-size:12px;min-width:90%;padding:4px}.slogan{margin-top:auto;margin-bottom:26px;padding:13px 24px;border-radius:40px;border:2px solid #efd1d1;background:#fff9f3c9;text-align:center;font-size:15px;box-shadow:0 4px 12px #b98a8925}
-.reward{align-self:start;margin-top:55px;border:2px solid #e9bdc8;border-radius:20px;background:linear-gradient(#fff8f8,#f8dce7);padding:12px 8px;width:100%;text-align:center;box-shadow:0 5px 15px #bd829633}.gift{font-size:42px}.reward h3{font-size:15px;margin:4px 0 12px}.diamonds{font-size:35px}.reward .amount{font-size:20px;font-weight:bold;margin:5px}.claim{width:100%;border-radius:22px;padding:8px 3px;background:#bd6e8b;color:white;border:1px solid #eabac9;font-size:12px}.claim:disabled{opacity:.75}.small{font:11px system-ui;color:#936d7d;margin-top:8px}
-.continue{position:absolute;right:18px;bottom:18px;width:124px;height:124px;border-radius:50%;border:3px solid #e9b5c5;background:linear-gradient(145deg,#fff,#f6cbd9);box-shadow:inset 0 0 0 5px #fff9,0 5px 16px #a86e8533;color:#71384f;font-size:14px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px}.continue span{font-size:36px}
-.overlay{display:none;position:fixed;inset:0;background:#51344877;z-index:5;align-items:center;justify-content:center;padding:20px}.overlay.show{display:flex}.dialog{background:#fff9f7;border:2px solid #e9bdc8;border-radius:24px;padding:22px;width:min(380px,100%);text-align:center}.dialog h2{color:#ae7890}.choice{display:block;width:100%;margin:8px 0;border-radius:20px;padding:11px;background:#f5e1e7;color:#75475c;border:1px solid #e7c4ce}
-@media(max-width:700px){.top{height:auto;min-height:70px;flex-wrap:wrap}.brand{font-size:18px}.chip{padding:6px 8px;font-size:11px}.chip b{font-size:13px}.layout{grid-template-columns:60px 1fr 82px;gap:5px;padding:6px;min-height:calc(100svh - 70px)}.side{gap:10px;padding-top:18px}.nav{width:54px;height:54px;font-size:9px}.nav span{font-size:21px}.center{padding-top:35px}.person{width:35%}.portrait{width:clamp(88px,25vw,145px);border-width:3px}.love{font-size:28px;min-width:35px}.personlabel{font-size:12px;padding:5px 2px}.mood{font-size:16px}.reward{margin-top:35px;padding:7px 4px;border-radius:14px}.gift{font-size:26px}.reward h3{font-size:10px}.diamonds{font-size:25px}.reward .amount{font-size:15px}.claim{font-size:9px;padding:6px 1px}.small{font-size:8px}.kids{margin-top:32px;gap:5px}.kid{width:30%}.kid .portrait{width:clamp(60px,17vw,90px)}.kid .personlabel{font-size:9px}.slogan{font-size:11px;margin:30px 95px 18px 0;padding:9px 12px}.continue{width:82px;height:82px;right:7px;bottom:8px;font-size:10px}.continue span{font-size:25px}}
-@media(max-width:370px){.layout{grid-template-columns:52px 1fr 70px}.nav{width:48px;height:48px}.chip{font-size:10px}.center{padding-top:30px}.portrait{width:82px}.love{font-size:24px}.continue{width:70px;height:70px}}
-</style></head><body><div class="game">
-<header class="top"><div class="brand">♛ DYNASTY ✧<small>— Royal Family —</small></div><div class="topright"><div class="chip">▦ <b id="date">12 / 04 / Năm 18</b></div><div class="chip">🪙 <b id="gold">1,250</b>　＋</div><div class="chip">💎 <b id="gems">35</b>　＋</div></div></header>
-<div class="layout"><aside class="side"><button class="nav" onclick="toast('Gia phả')"><span>🏰</span>Gia Phả</button><button class="nav" onclick="claim()"><span>🎁</span>Quà Ngày</button><button class="nav" onclick="toast('Cửa hàng')"><span>🛍️</span>Cửa Hàng</button><button class="nav" onclick="toast('VIP')"><span>👑</span>VIP</button></aside>
-<section class="center"><div class="couple"><div class="person"><div class="portrait"><div class="face" id="maleFace"></div></div><div class="personlabel"><span id="maleAge">18 tuổi</span></div><div class="mood">😊</div></div><div class="love">♥<small id="love">92%</small></div><div class="person"><div class="portrait"><div class="face" id="femaleFace"></div></div><div class="personlabel"><span id="femaleAge">18 tuổi</span></div><div class="mood">😍</div></div></div>
-<div class="kids" id="kids"><div class="kid"><div class="portrait"><div class="face" id="kid1"></div></div></div><div class="kid"><div class="portrait"><div class="face" id="kid2"></div></div></div><div class="kid"><div class="portrait"><div class="face" id="kid3"></div></div></div></div>
-<div class="slogan">🌸 Gia đình nhỏ, hạnh phúc lớn 💗</div></section>
-<aside class="reward"><div class="gift">🎁</div><h3>Quà Đăng Nhập</h3><div class="diamonds">💎</div><div class="amount">🪙 100</div><button class="claim" id="claim" onclick="claim()">✓ Nhận</button><div class="small">Nhận lại vào ngày mai</div></aside>
-<button class="continue" onclick="advance()"><span>⌛</span>Tiếp tục<br>thời gian</button></div></div>
-<div class="overlay" id="modal"><div class="dialog"><h2>Quà đăng nhập 🎁</h2><p>Bạn nhận được 100 vàng và 1 kim cương.</p><button class="choice" onclick="closeModal()">Tuyệt vời</button></div></div>
-<div class="overlay" id="toastModal"><div class="dialog"><h2 id="toastText">DYNASTY</h2><button class="choice" onclick="closeToast()">Đóng</button></div></div>
-<script src="assets/avatars.js"></script><script>
-const ages=[1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,40,45,50,55,60,65,70,75,80,85,90,95,100];
-let state={age:18,gold:1250,gems:35,love:92,day:12,month:4,year:18,kids:3,claimed:""};
-try{state={...state,...JSON.parse(localStorage.getItem("dynasty-family-save")||"{}")}}catch(e){}
-function idx(age,offset=0){let i=ages.findIndex(a=>a>=age);if(i<0)i=ages.length-1;return Math.max(0,Math.min(47,i+offset))}
-function setFace(id,age,gender){const el=document.getElementById(id);const i=idx(age,gender==="female"?1:0);const x=i%8,y=Math.floor(i/8);el.style.backgroundImage='url("'+window.DYNASTY_AVATAR_SPRITE+'")';el.style.backgroundSize='800% 600%';el.style.backgroundPosition=(x/7*100)+'% '+(y/5*100)+'%'}
-function paint(){document.getElementById("date").textContent=String(state.day).padStart(2,"0")+" / "+String(state.month).padStart(2,"0")+" / Năm "+state.year;document.getElementById("gold").textContent=state.gold.toLocaleString("vi-VN");document.getElementById("gems").textContent=state.gems;document.getElementById("love").textContent=state.love+"%";document.getElementById("maleAge").textContent=state.age+" tuổi";document.getElementById("femaleAge").textContent=state.age+" tuổi";setFace("maleFace",state.age,"male");setFace("femaleFace",state.age,"female");for(let i=1;i<=3;i++)setFace("kid"+i,Math.max(1,state.age-18),i===2?"female":"male");let c=document.getElementById("claim");let done=state.claimed===new Date().toDateString();c.disabled=done;c.textContent=done?"✓ Đã nhận":"✓ Nhận";localStorage.setItem("dynasty-family-save",JSON.stringify(state))}
-function advance(){state.day++;state.gold+=20;if(state.day>30){state.day=1;state.month++;if(state.month>12){state.month=1;state.year++;state.age++}}paint()}
-function claim(){let today=new Date().toDateString();if(state.claimed===today){showToast("Bạn đã nhận quà hôm nay rồi!");return}state.claimed=today;state.gold+=100;state.gems+=1;paint();document.getElementById("modal").classList.add("show")}
-function closeModal(){document.getElementById("modal").classList.remove("show")}
-function toast(t){showToast(t)}function showToast(t){document.getElementById("toastText").textContent=t;document.getElementById("toastModal").classList.add("show")}function closeToast(){document.getElementById("toastModal").classList.remove("show")}
-paint();setInterval(advance,18000);
-</script></body></html>
+:root{color-scheme:light;--cream:#fbf7ef;--pink:#e8b9c5;--gold:#c69b50}
+*{box-sizing:border-box}
+html,body{margin:0;min-height:100%;background:var(--cream)}
+body{min-height:100svh;display:grid;place-items:center;font-family:system-ui,sans-serif}
+main{width:100%;min-height:100svh;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:22px;padding:24px}
+.avatar{width:min(68vw,300px);aspect-ratio:1;border-radius:50%;display:grid;place-items:center;background:radial-gradient(circle at 50% 34%,#fff 0 35%,#f3dce0 36% 70%,#ead3c4 71%);border:7px solid #fff;box-shadow:0 10px 35px #b99b8730;overflow:hidden}
+.avatar svg{width:82%;height:82%}
+.earn{display:flex;align-items:center;gap:9px;color:var(--gold);font-size:clamp(25px,7vw,36px);font-weight:700;letter-spacing:.4px;font-variant-numeric:tabular-nums}
+.coin{width:25px;height:25px;border-radius:50%;display:inline-grid;place-items:center;background:linear-gradient(135deg,#f9e4a0,#c99b45);border:2px solid #fff;box-shadow:0 2px 5px #9c773533}
+.coin:after{content:"";width:7px;height:7px;border:2px solid #fff4;border-radius:50%}
+</style>
+</head>
+<body>
+<main>
+<div class="avatar" aria-label="avatar nhân vật">
+<svg viewBox="0 0 240 240" xmlns="http://www.w3.org/2000/svg">
+<path d="M35 229c4-48 34-73 85-73s81 25 85 73" fill="#d9aeb8"/>
+<path d="M73 96c0-54 19-77 50-77s50 23 50 77v43c-9 32-27 48-50 48s-41-16-50-48z" fill="#f4c9aa"/>
+<path d="M67 103C53 45 79 12 123 12c45 0 68 34 53 91-10-29-25-45-52-48-19 19-37 25-57 27z" fill="#59433f"/>
+<path d="M69 89c-8 47 2 83 24 105-34-11-48-48-39-89zM171 88c8 48-2 84-24 106 34-12 48-49 39-90z" fill="#59433f"/>
+<ellipse cx="99" cy="112" rx="5" ry="7" fill="#59433f"/><ellipse cx="141" cy="112" rx="5" ry="7" fill="#59433f"/>
+<path d="M109 139q11 9 22 0" fill="none" stroke="#b96f72" stroke-width="4" stroke-linecap="round"/>
+<path d="M84 165q36 24 72 0l18 64H66z" fill="#fff7f0"/>
+<path d="M91 169l29 26 29-26" fill="none" stroke="#d6a2ad" stroke-width="5"/>
+</svg>
+</div>
+<div class="earn"><span class="coin"></span><span id="income">20</span></div>
+</main>
+<script>
+let income=20;
+const el=document.getElementById('income');
+function nextDay(){income+=20;el.textContent=income.toLocaleString('vi-VN');}
+setInterval(nextDay,18000);
+</script>
+</body>
+</html>
