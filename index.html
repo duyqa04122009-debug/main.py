@@ -1,43 +1,78 @@
 <!doctype html>
 <html lang="vi">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>DYNASTY</title>
 <style>
-:root{color-scheme:light;--cream:#fbf7ef;--pink:#e8b9c5;--gold:#c69b50}
-*{box-sizing:border-box}
-html,body{margin:0;min-height:100%;background:var(--cream)}
-body{min-height:100svh;display:grid;place-items:center;font-family:system-ui,sans-serif}
-main{width:100%;min-height:100svh;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:22px;padding:24px}
-.avatar{width:min(68vw,300px);aspect-ratio:1;border-radius:50%;display:grid;place-items:center;background:radial-gradient(circle at 50% 34%,#fff 0 35%,#f3dce0 36% 70%,#ead3c4 71%);border:7px solid #fff;box-shadow:0 10px 35px #b99b8730;overflow:hidden}
+:root{--cream:#fbf7ef;--pink:#e8b9c5;--pink2:#f5e2e5;--gold:#c69b50;--ink:#594c58;--white:#fffdfb}
+*{box-sizing:border-box}html,body{margin:0;min-height:100%;background:var(--cream);font-family:system-ui,sans-serif;color:var(--ink)}
+body{min-height:100svh;overflow:hidden}
+.hud{position:absolute;z-index:2;top: max(12px,env(safe-area-inset-top));left:12px;right:12px;display:flex;align-items:flex-start;justify-content:space-between;gap:8px}
+.round{width:44px;height:44px;border:1px solid #ead8d1;border-radius:50%;background:#fffdfb;box-shadow:0 3px 12px #9e7b6920;color:#9c7480;font-size:21px;display:grid;place-items:center;cursor:pointer}
+.left{display:flex;flex-direction:column;gap:8px}
+.date{background:#fffdfbdf;border:1px solid #ead8d1;border-radius:15px;padding:7px 11px;text-align:center;font-size:12px;font-weight:700;box-shadow:0 3px 12px #9e7b6920;white-space:nowrap}
+.wallet{display:flex;gap:7px}
+.pill{display:flex;align-items:center;gap:6px;background:#fffdfb;border:1px solid #ead8d1;border-radius:18px;padding:8px 11px;font-size:14px;font-weight:800;color:var(--gold);box-shadow:0 3px 12px #9e7b6920}
+.gem{color:#9a86c8}
+.side{position:absolute;z-index:2;top:50%;transform:translateY(-50%);display:flex;flex-direction:column;gap:13px}
+.side.leftside{left:12px}.side.rightside{right:12px}
+.side .round{width:48px;height:48px;font-size:22px}
+main{min-height:100svh;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px;padding:76px 70px 28px}
+.avatar{width:min(56vw,270px);aspect-ratio:1;border-radius:50%;display:grid;place-items:center;background:radial-gradient(circle at 50% 34%,#fff 0 35%,#f3dce0 36% 70%,#ead3c4 71%);border:7px solid white;box-shadow:0 10px 35px #b99b8730;overflow:hidden}
 .avatar svg{width:82%;height:82%}
-.earn{display:flex;align-items:center;gap:9px;color:var(--gold);font-size:clamp(25px,7vw,36px);font-weight:700;letter-spacing:.4px;font-variant-numeric:tabular-nums}
-.coin{width:25px;height:25px;border-radius:50%;display:inline-grid;place-items:center;background:linear-gradient(135deg,#f9e4a0,#c99b45);border:2px solid #fff;box-shadow:0 2px 5px #9c773533}
-.coin:after{content:"";width:7px;height:7px;border:2px solid #fff4;border-radius:50%}
-</style>
-</head>
+.income{display:flex;align-items:center;gap:9px;color:var(--gold);font-size:clamp(23px,6vw,32px);font-weight:800;font-variant-numeric:tabular-nums}
+.coin{width:23px;height:23px;border-radius:50%;background:linear-gradient(135deg,#f9e4a0,#c99b45);border:2px solid white;box-shadow:0 2px 5px #9c773533}
+.overlay{position:fixed;inset:0;z-index:5;background:#51424a66;display:none;align-items:center;justify-content:center;padding:22px}
+.panel{width:min(330px,100%);background:var(--white);border:1px solid #ead8d1;border-radius:22px;padding:20px;text-align:center;box-shadow:0 15px 50px #4b344033}
+.panel button{border:0;border-radius:14px;background:var(--pink2);color:var(--ink);padding:11px 16px;font-size:15px;margin-top:12px}
+.panel .close{float:right;margin:0;background:transparent;font-size:20px;padding:0 6px}
+.panel h3{margin:8px 0 14px;font-size:18px}
+.panel p{margin:8px 0}
+@media(min-width:700px){main{padding-top:85px}.side.leftside{left:calc(50% - 250px)}.side.rightside{right:calc(50% - 250px)}}
+</style></head>
 <body>
+<header class="hud">
+ <div class="left"><button class="round" aria-label="Cài đặt" onclick="openPanel('settings')">⚙</button><div class="date" id="date">01/01/2026</div></div>
+ <div class="wallet"><div class="pill">🪙 <span id="gold">100</span></div><div class="pill gem">💎 <span id="gems">10</span></div></div>
+</header>
+<nav class="side leftside">
+ <button class="round" aria-label="Bỏ quảng cáo" onclick="openPanel('ads')">🚫</button>
+ <button class="round" aria-label="Cửa hàng" onclick="openPanel('shop')">🛍</button>
+</nav>
+<nav class="side rightside">
+ <button class="round" aria-label="Quà hằng ngày" onclick="openPanel('gift')">🎁</button>
+</nav>
 <main>
-<div class="avatar" aria-label="avatar nhân vật">
-<svg viewBox="0 0 240 240" xmlns="http://www.w3.org/2000/svg">
-<path d="M35 229c4-48 34-73 85-73s81 25 85 73" fill="#d9aeb8"/>
-<path d="M73 96c0-54 19-77 50-77s50 23 50 77v43c-9 32-27 48-50 48s-41-16-50-48z" fill="#f4c9aa"/>
-<path d="M67 103C53 45 79 12 123 12c45 0 68 34 53 91-10-29-25-45-52-48-19 19-37 25-57 27z" fill="#59433f"/>
-<path d="M69 89c-8 47 2 83 24 105-34-11-48-48-39-89zM171 88c8 48-2 84-24 106 34-12 48-49 39-90z" fill="#59433f"/>
-<ellipse cx="99" cy="112" rx="5" ry="7" fill="#59433f"/><ellipse cx="141" cy="112" rx="5" ry="7" fill="#59433f"/>
-<path d="M109 139q11 9 22 0" fill="none" stroke="#b96f72" stroke-width="4" stroke-linecap="round"/>
-<path d="M84 165q36 24 72 0l18 64H66z" fill="#fff7f0"/>
-<path d="M91 169l29 26 29-26" fill="none" stroke="#d6a2ad" stroke-width="5"/>
-</svg>
-</div>
-<div class="earn"><span class="coin"></span><span id="income">20</span></div>
+ <div class="avatar" aria-label="Avatar nhân vật">
+ <svg viewBox="0 0 240 240" xmlns="http://www.w3.org/2000/svg">
+ <path d="M35 229c4-48 34-73 85-73s81 25 85 73" fill="#d9aeb8"/>
+ <path d="M73 96c0-54 19-77 50-77s50 23 50 77v43c-9 32-27 48-50 48s-41-16-50-48z" fill="#f4c9aa"/>
+ <path d="M67 103C53 45 79 12 123 12c45 0 68 34 53 91-10-29-25-45-52-48-19 19-37 25-57 27z" fill="#59433f"/>
+ <path d="M69 89c-8 47 2 83 24 105-34-11-48-48-39-89zM171 88c8 48-2 84-24 106 34-12 48-49 39-90z" fill="#59433f"/>
+ <ellipse cx="99" cy="112" rx="5" ry="7" fill="#59433f"/><ellipse cx="141" cy="112" rx="5" ry="7" fill="#59433f"/>
+ <path d="M109 139q11 9 22 0" fill="none" stroke="#b96f72" stroke-width="4" stroke-linecap="round"/>
+ <path d="M84 165q36 24 72 0l18 64H66z" fill="#fff7f0"/><path d="M91 169l29 26 29-26" fill="none" stroke="#d6a2ad" stroke-width="5"/>
+ </svg>
+ </div>
+ <div class="income"><span class="coin"></span><span id="daily">20</span></div>
 </main>
+<div class="overlay" id="overlay" onclick="if(event.target===this)closePanel()"><section class="panel"><button class="close" onclick="closePanel()">✕</button><div id="panelBody"></div></section></div>
 <script>
-let income=20;
-const el=document.getElementById('income');
-function nextDay(){income+=20;el.textContent=income.toLocaleString('vi-VN');}
-setInterval(nextDay,18000);
-</script>
-</body>
-</html>
+let gold=100,gems=10,daily=20,day=1,month=1,year=2026;
+const $=id=>document.getElementById(id);
+function draw(){ $('gold').textContent=gold.toLocaleString('vi-VN');$('gems').textContent=gems.toLocaleString('vi-VN');$('daily').textContent=daily.toLocaleString('vi-VN');$('date').textContent=String(day).padStart(2,'0')+'/'+String(month).padStart(2,'0')+'/'+year; }
+function openPanel(which){
+ const content={
+ settings:'<h3>⚙</h3><p>♪ Âm thanh　　●</p><p>♪ Nhạc nền　　●</p><p>Ngôn ngữ　　Tiếng Việt</p>',
+ ads:'<h3>🚫</h3><p>Quảng cáo đang được tắt trong bản thử nghiệm.</p>',
+ shop:'<h3>🛍</h3><p>🪙 100　　💎 10</p><p>Cửa hàng sẽ mở thêm vật phẩm trong bản tiếp theo.</p>',
+ gift:'<h3>🎁</h3><p>Phần quà hôm nay</p><p>🪙 +50</p><button onclick="claimGift()">Nhận quà</button>'
+ };
+ $('panelBody').innerHTML=content[which];$('overlay').style.display='flex';
+}
+function closePanel(){$('overlay').style.display='none'}
+let gifted=localStorage.getItem('dynastyGiftDate')===new Date().toLocaleDateString();
+function claimGift(){if(gifted){$('panelBody').innerHTML='<h3>🎁</h3><p>Đã nhận quà hôm nay</p>';return}gold+=50;gifted=true;localStorage.setItem('dynastyGiftDate',new Date().toLocaleDateString());draw();$('panelBody').innerHTML='<h3>🎁</h3><p>+50 🪙</p>'; }
+function nextGameDay(){day++;if(day>30){day=1;month++;}if(month>12){month=1;year++;}daily+=20;gold+=20;draw();}
+draw();setInterval(nextGameDay,18000);
+</script></body></html>
